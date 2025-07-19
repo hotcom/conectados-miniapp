@@ -57,7 +57,7 @@ export function WalletConnect() {
         >
           <Wallet className={`w-4 h-4 mr-2 ${isConnecting ? 'animate-pulse' : ''}`} />
           <span className={isConnecting ? 'opacity-0' : ''}>
-            {isConnecting ? "Conectando..." : "Coinbase Wallet"}
+            {isConnecting ? "Conectando..." : "Conectar Carteira"}
           </span>
           {isConnecting && (
             <span className="absolute inset-0 flex items-center justify-center">

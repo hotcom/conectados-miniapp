@@ -146,7 +146,8 @@ export function useWallet() {
     }
 
     if (!window.ethereum) {
-      alert("Por favor, instale MetaMask ou Coinbase Wallet para continuar!\n\nVocê pode baixar em:\n- MetaMask: https://metamask.io\n- Coinbase Wallet: https://www.coinbase.com/wallet")
+      window.open('https://www.coinbase.com/wallet', '_blank')
+      alert("Por favor, instale a Coinbase Wallet para continuar!\n\nVocê será redirecionado para a página de download.")
       return
     }
 
