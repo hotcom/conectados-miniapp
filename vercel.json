@@ -69,10 +69,6 @@
     {
       "source": "/miniapp-manifest.json",
       "destination": "/api/miniapp-manifest"
-    },
-    {
-      "source": "/.well-known/farcaster.json",
-      "destination": "/farcaster-manifest.json"
     }
   ],
   "env": {
