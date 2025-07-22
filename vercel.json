@@ -1,6 +1,5 @@
 {
   "name": "conectados-miniapp",
-  "public": true,
   "headers": [
     {
       "source": "/(.*)",
@@ -73,14 +72,9 @@
     },
     {
       "source": "/.well-known/farcaster.json",
-      "destination": "/farcaster-manifest"
+      "destination": "/farcaster-manifest.json"
     }
   ],
-  "functions": {
-    "app/api/farcaster-manifest/route.ts": {
-      "maxDuration": 10
-    }
-  },
   "env": {
     "NEXT_PUBLIC_MINIAPP_MODE": "true",
     "NEXT_PUBLIC_CHAIN_ID": "84532",
