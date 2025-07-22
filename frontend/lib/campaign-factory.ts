@@ -123,6 +123,70 @@ export class CampaignFactory {
   }
 
   /**
+   * Get total number of campaigns
+   */
+  async getCampaignCount(): Promise<number> {
+    try {
+      const count = await this.contract.campaignCount()
+      return count.toNumber()
+    } catch (error: any) {
+      console.error('Error getting campaign count:', error)
+      throw new Error(`Failed to get campaign count: ${error.message}`)
+    }
+  }
+
+  /**
+   * Get all campaigns from the blockchain
+   */
+  async getAllCampaigns(): Promise<any[]> {
+    try {
+      const count = await this.getCampaignCount()
+      console.log('Total campaigns on blockchain:', count)
+      
+      const campaigns = []
+      
+      for (let i = 1; i <= count; i++) {
+        try {
+          const details = await this.contract.getCampaignDetails(i)
+          const info = details.info
+          
+          const campaign = {
+            id: `campaign_${i}`,
+            campaignId: i,
+            contractAddress: info.contractAddress,
+            title: info.title,
+            creator: info.creator,
+            beneficiary: info.beneficiary,
+            goal: parseFloat(ethers.utils.formatEther(info.goal)),
+            raised: parseFloat(ethers.utils.formatEther(details.raised)),
+            balance: parseFloat(ethers.utils.formatEther(details.balance)),
+            progress: details.progressPercentage.toNumber(),
+            createdAt: info.createdAt.toNumber() * 1000, // Convert to milliseconds
+            active: info.active,
+            organizationId: info.creator,
+            description: `Campanha criada on-chain #${i}`,
+            donors: 0, // Will be updated from contract if needed
+            daysLeft: 30,
+            status: info.active ? 'active' : 'inactive',
+            walletAddress: info.beneficiary
+          }
+          
+          campaigns.push(campaign)
+          console.log(`Campaign ${i} loaded:`, campaign.title)
+        } catch (error) {
+          console.warn(`Failed to load campaign ${i}:`, error)
+        }
+      }
+      
+      console.log('All campaigns loaded:', campaigns.length)
+      return campaigns
+    } catch (error: any) {
+      console.error('Error getting all campaigns:', error)
+      throw new Error(`Failed to get all campaigns: ${error.message}`)
+    }
+  }
+
+  /**
    * Get campaign information by ID
    */
   async getCampaignInfo(campaignId: number) {

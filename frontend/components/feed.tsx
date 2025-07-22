@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react"
 import { PostCard } from "@/components/post-card"
 import { Card, CardContent } from "@/components/ui/card"
-import { Heart, Users, MessageCircle, RefreshCw } from "lucide-react"
+import { Heart, Users, MessageCircle, RefreshCw, Database } from "lucide-react"
 import { storage, type Post, type Organization } from "@/lib/storage"
 import { useWalletContext } from "@/contexts/wallet-context"
 import { Campaign } from "@/lib/campaign-factory"
+import { loadCampaignsFromBlockchain, createPostsFromCampaigns, isWalletConnected } from "@/lib/blockchain-campaigns"
 import { ethers } from "ethers"
 
 export function Feed() {
@@ -15,8 +16,47 @@ export function Feed() {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [onChainData, setOnChainData] = useState<{[key: string]: any}>({})
   const [isLoadingOnChain, setIsLoadingOnChain] = useState(false)
+  const [isLoadingBlockchain, setIsLoadingBlockchain] = useState(false)
   const walletHook = useWalletContext()
   const isConnected = walletHook.isConnected
+
+  // Load campaigns from blockchain (solves localStorage isolation)
+  const loadBlockchainCampaigns = async () => {
+    console.log('🔄 Loading campaigns from blockchain...')
+    setIsLoadingBlockchain(true)
+    
+    try {
+      const blockchainCampaigns = await loadCampaignsFromBlockchain()
+      console.log('✅ Loaded campaigns from blockchain:', blockchainCampaigns.length)
+      
+      setCampaigns(blockchainCampaigns)
+      
+      // Create posts from blockchain campaigns
+      const blockchainPosts = createPostsFromCampaigns(blockchainCampaigns)
+      
+      // Also load localStorage posts (for backward compatibility)
+      const localPosts = storage.getPosts()
+      
+      // Combine and deduplicate posts
+      const allPosts = [...blockchainPosts, ...localPosts]
+      const uniquePosts = allPosts.filter((post, index, self) => 
+        index === self.findIndex(p => p.id === post.id)
+      )
+      
+      setPosts(uniquePosts)
+      console.log('📊 Total posts loaded:', uniquePosts.length)
+      
+    } catch (error) {
+      console.error('❌ Error loading blockchain campaigns:', error)
+      // Fallback to localStorage only
+      const localPosts = storage.getPosts()
+      const localCampaigns = storage.getCampaigns()
+      setPosts(localPosts)
+      setCampaigns(localCampaigns)
+    } finally {
+      setIsLoadingBlockchain(false)
+    }
+  }
 
   // Load on-chain data for campaigns
   const loadOnChainData = async () => {
@@ -79,16 +119,35 @@ export function Feed() {
   }
 
   useEffect(() => {
-    // Load all posts, organizations, and campaigns
-    const allPosts = storage.getPosts()
-    const allOrgs = storage.getOrganizations()
-    const allCampaigns = storage.getCampaigns()
+    const loadData = async () => {
+      console.log('🔄 Loading feed data...')
+      
+      // Try to load campaigns from blockchain first
+      if (isWalletConnected()) {
+        console.log('💰 Wallet detected, loading from blockchain...')
+        await loadBlockchainCampaigns()
+      } else {
+        console.log('📱 No wallet, loading from localStorage...')
+        // Fallback to localStorage when no wallet
+        const storedPosts = storage.getPosts()
+        const storedCampaigns = storage.getCampaigns()
+        const storedOrganizations = storage.getOrganizations()
+        
+        console.log('📊 Loaded from storage:', {
+          posts: storedPosts.length,
+          campaigns: storedCampaigns.length,
+          organizations: storedOrganizations.length
+        })
+        
+        setPosts(storedPosts)
+        setCampaigns(storedCampaigns)
+        setOrganizations(storedOrganizations)
+      }
+    }
     
-    setPosts(allPosts)
-    setOrganizations(allOrgs)
-    setCampaigns(allCampaigns)
-  }, [])
-  
+    loadData()
+  }, [isConnected]) // Reload when wallet connection changes
+
   // Load on-chain data when campaigns are loaded and wallet is connected
   useEffect(() => {
     if (campaigns.length > 0 && isConnected) {
@@ -163,6 +222,20 @@ export function Feed() {
       donorCount: onChainCampaign?.donorCount || 0,
     }
   }).filter((post): post is NonNullable<typeof post> => post !== null)
+
+  if (isLoadingBlockchain) {
+    return (
+      <Card className="p-8 text-center">
+        <CardContent>
+          <Database className="mx-auto mb-4 h-12 w-12 text-blue-500 animate-pulse" />
+          <p className="text-lg font-semibold mb-2">Carregando campanhas da blockchain...</p>
+          <p className="text-muted-foreground">
+            Buscando campanhas diretamente dos contratos inteligentes
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (transformedPosts.length === 0) {
     return (
