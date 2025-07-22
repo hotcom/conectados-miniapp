@@ -1,5 +1,21 @@
 import { NextResponse } from 'next/server'
 
+// CORS headers for all responses
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+  'Access-Control-Max-Age': '86400',
+}
+
+// Handle OPTIONS preflight requests
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  })
+}
+
 export async function GET() {
   const manifest = {
     "name": "Conectados - Doações Descentralizadas",
@@ -52,12 +68,11 @@ export async function GET() {
   }
 
   return NextResponse.json(manifest, {
+    status: 200,
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'public, max-age=3600',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      ...corsHeaders,
     },
   })
 }
