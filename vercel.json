@@ -1,5 +1,6 @@
 {
   "name": "conectados-miniapp",
+  "public": true,
   "headers": [
     {
       "source": "/(.*)",
@@ -11,6 +12,31 @@
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/.well-known/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
         }
       ]
     },
@@ -47,9 +73,14 @@
     },
     {
       "source": "/.well-known/farcaster.json",
-      "destination": "/.well-known/farcaster.json"
+      "destination": "/api/farcaster-manifest"
     }
   ],
+  "functions": {
+    "app/api/farcaster-manifest/route.ts": {
+      "maxDuration": 10
+    }
+  },
   "env": {
     "NEXT_PUBLIC_MINIAPP_MODE": "true",
     "NEXT_PUBLIC_CHAIN_ID": "84532",
