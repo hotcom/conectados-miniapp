@@ -1,0 +1,44 @@
+{
+  "name": "Conectados - Doações Descentralizadas",
+  "short_name": "Conectados",
+  "description": "Plataforma descentralizada para ONGs criarem perfis, campanhas e receberem doações em cBRL na Base",
+  "version": "1.0.0",
+  "manifest_version": 1,
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0052FF",
+  "background_color": "#ffffff",
+  "categories": ["social", "finance", "charity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "coinbase_miniapp": {
+    "permissions": [
+      "wallet",
+      "network",
+      "transactions"
+    ],
+    "supported_networks": [
+      "base-sepolia",
+      "base"
+    ],
+    "required_features": [
+      "web3",
+      "wallet_connection"
+    ]
+  },
+  "developer": {
+    "name": "Conectados Team",
+    "url": "https://conectados.app"
+  }
+}

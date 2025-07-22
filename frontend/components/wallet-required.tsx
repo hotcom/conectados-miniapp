@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Wallet, AlertCircle, Shield, Zap } from "lucide-react"
-import { useWallet } from "@/hooks/use-wallet"
+import { useWalletContext } from "@/contexts/wallet-context"
 
 interface WalletRequiredProps {
   children: React.ReactNode
@@ -19,7 +19,7 @@ export function WalletRequired({
   title = "Carteira Necessária",
   description = "Conecte sua carteira para continuar",
 }: WalletRequiredProps) {
-  const { isConnected, connect, isConnecting } = useWallet()
+  const { isConnected, connect, isConnecting } = useWalletContext()
 
   if (isConnected) {
     return <>{children}</>

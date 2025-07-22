@@ -3,10 +3,10 @@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, CheckCircle, Wifi, ExternalLink } from "lucide-react"
-import { useWallet } from "@/hooks/use-wallet"
+import { useWalletContext } from "@/contexts/wallet-context"
 
 export function NetworkStatus() {
-  const { isConnected, network, isCorrectNetwork, addBaseSepolia } = useWallet()
+  const { isConnected, network, isCorrectNetwork, addBaseSepolia } = useWalletContext()
 
   if (!isConnected) {
     return null

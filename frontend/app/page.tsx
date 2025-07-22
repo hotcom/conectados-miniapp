@@ -17,19 +17,37 @@ export default function HomePage() {
           <div className="lg:col-span-1">
             <div className="sticky top-20">
               <div className="bg-white rounded-lg p-4 shadow-sm border">
-                <h3 className="font-semibold text-gray-900 mb-3">Sugestões para você</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                        ONG
+                <h3 className="font-semibold text-gray-900 mb-3">Sobre o Conectados Impact</h3>
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-600">
+                    <p className="mb-2">
+                      Plataforma descentralizada para ONGs e organizações do terceiro setor.
+                    </p>
+                    <p className="mb-2">
+                      Receba doações via PIX convertidas automaticamente em cBRL na blockchain Base.
+                    </p>
+                  </div>
+                  
+                  <div className="border-t pt-3">
+                    <h4 className="font-medium text-gray-900 mb-2">Como funciona:</h4>
+                    <div className="space-y-2 text-xs text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                        <span>Crie o perfil da sua organização</span>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium">Casa da Criança</p>
-                        <p className="text-xs text-gray-500">Sugerido para você</p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                        <span>Publique suas causas e campanhas</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                        <span>Receba doações via PIX</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                        <span>Tokens cBRL mintados automaticamente</span>
                       </div>
                     </div>
-                    <button className="text-blue-500 text-sm font-medium hover:text-blue-600">Seguir</button>
                   </div>
                 </div>
               </div>

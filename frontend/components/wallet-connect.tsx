@@ -1,29 +1,40 @@
 "use client"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Wallet, Copy, LogOut, User, Settings, AlertTriangle, CheckCircle, Plus } from "lucide-react"
-import { useWallet } from "@/hooks/use-wallet"
+import { Wallet, ChevronDown, Copy, LogOut, User, Settings, AlertTriangle, CheckCircle, Plus } from "lucide-react"
+import { useWalletContext } from "@/contexts/wallet-context"
+import { WalletSelectionModal } from "@/components/wallet-selection-modal"
 
 export function WalletConnect() {
-  const {
-    isConnected,
-    address,
-    balance,
-    network,
-    connect,
-    disconnect,
-    isConnecting,
-    addBaseSepolia,
-    isCorrectNetwork,
-  } = useWallet()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const wallet = useWalletContext()
+  
+  // Extract wallet state
+  const isConnected = wallet.isConnected
+  const address = wallet.address
+  const balance = wallet.balance
+  const network = wallet.network
+  const connect = wallet.connect
+  const disconnect = wallet.disconnect
+  const isConnecting = wallet.isConnecting
+  const addBaseSepolia = wallet.addBaseSepolia
+  const isCorrectNetwork = wallet.isCorrectNetwork
+
+  console.log('=== WALLET CONNECT DEBUG ===')
+  console.log('isConnected:', isConnected)
+  console.log('address:', address)
+  console.log('isConnecting:', isConnecting)
+  console.log('network:', network)
+  console.log('isCorrectNetwork:', isCorrectNetwork)
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`
@@ -36,11 +47,20 @@ export function WalletConnect() {
     }
   }
 
+  const connectWithWallet = async (walletType?: 'metamask' | 'coinbase') => {
+    try {
+      await connect(walletType)
+    } catch (error) {
+      console.error('Erro ao conectar carteira:', error)
+    }
+  }
+
   const handleAddNetwork = async () => {
-    const success = await addBaseSepolia()
-    if (success) {
+    try {
+      await addBaseSepolia()
       alert("Rede Base Sepolia adicionada! Agora mude para ela manualmente na sua carteira.")
-    } else {
+    } catch (error) {
+      console.error('Error adding network:', error)
       alert(
         "Erro ao adicionar rede. Tente adicionar manualmente:\n\nNome: Base Sepolia\nRPC: https://sepolia.base.org\nChain ID: 84532",
       )
@@ -49,23 +69,34 @@ export function WalletConnect() {
 
   if (!isConnected) {
     return (
-      <div className="flex items-center gap-2">
-        <Button 
-          onClick={connect} 
-          disabled={isConnecting} 
-          className={`relative ${isConnecting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
-        >
-          <Wallet className={`w-4 h-4 mr-2 ${isConnecting ? 'animate-pulse' : ''}`} />
-          <span className={isConnecting ? 'opacity-0' : ''}>
-            {isConnecting ? "Conectando..." : "Conectar Carteira"}
-          </span>
-          {isConnecting && (
-            <span className="absolute inset-0 flex items-center justify-center">
-              Conectando...
+      <>
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => {
+              console.log('=== OPENING WALLET MODAL ===')
+              setIsModalOpen(true)
+            }}
+            disabled={isConnecting} 
+            className={`relative ${isConnecting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+          >
+            <Wallet className={`w-4 h-4 mr-2 ${isConnecting ? 'animate-pulse' : ''}`} />
+            <span className={isConnecting ? 'opacity-0' : ''}>
+              {isConnecting ? "Conectando..." : "Conectar Carteira"}
             </span>
-          )}
-        </Button>
-      </div>
+            {isConnecting && (
+              <span className="absolute inset-0 flex items-center justify-center">
+                Conectando...
+              </span>
+            )}
+          </Button>
+        </div>
+        
+        <WalletSelectionModal 
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConnect={connectWithWallet}
+        />
+      </>
     )
   }
 
@@ -101,6 +132,16 @@ export function WalletConnect() {
           </div>
           <p className="text-xs text-gray-500 font-mono">{formatAddress(address!)}</p>
           {balance && <p className="text-xs text-green-600 font-medium mt-1">{balance}</p>}
+          
+          {/* Network Status */}
+          {isCorrectNetwork && (
+            <div className="flex items-center gap-2 mt-2 px-2 py-1 bg-green-50 rounded-md">
+              <CheckCircle className="w-3 h-3 text-green-500" />
+              <span className="text-xs text-green-700 font-medium">Conectado à Base Sepolia</span>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-xs text-green-600">Online</span>
+            </div>
+          )}
         </div>
 
         {!isCorrectNetwork && (

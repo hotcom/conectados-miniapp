@@ -254,16 +254,19 @@ export function useWallet() {
   const connect = async (walletType?: 'metamask' | 'coinbase') => {
     console.log('Iniciando conexão da carteira...')
     
-    // Special Coinbase Wallet verification and readiness check
+    // VERIFICAÇÃO ESPECIAL PARA COINBASE WALLET
     if (walletType === 'coinbase') {
       console.log("=== VERIFICANDO COINBASE WALLET ANTES DA CONEXÃO ===")
+      
       const ethereum = (window as any).ethereum
       if (!ethereum) {
         alert("Nenhuma carteira Ethereum detectada. Por favor, instale MetaMask ou Coinbase Wallet.")
         return
       }
-
+      
+      // Verificar se realmente existe Coinbase Wallet
       let realCoinbase = null
+      
       if (ethereum.providers && ethereum.providers.length > 0) {
         realCoinbase = ethereum.providers.find((p: any) => {
           return p.isCoinbaseWallet === true || 
@@ -271,9 +274,10 @@ export function useWallet() {
                  (p.constructor && p.constructor.name === 'CoinbaseWalletProvider')
         })
       }
-
+      
       if (!realCoinbase) {
         console.log("⚠️ Coinbase Wallet NÃO encontrada - mostrando alerta e parando")
+        
         alert(
           "⚠️ Coinbase Wallet não detectada!\n\n" +
             "Para usar a Coinbase Wallet:\n" +
@@ -282,40 +286,13 @@ export function useWallet() {
             "• Recarregue a página após instalar\n\n" +
             "Tente conectar com MetaMask como alternativa."
         )
-        return
-      }
-
-      // Verificar se Coinbase Wallet está pronta para conectar
-      console.log("🔍 Verificando se Coinbase Wallet está pronta...")
-      try {
-        const existingAccounts = await realCoinbase.request({ method: "eth_accounts" })
-        if (existingAccounts && existingAccounts.length > 0) {
-          console.log("✅ Coinbase Wallet já conectada:", existingAccounts)
-          // Se já está conectada, usar as contas existentes
-          const address = existingAccounts[0]
-          const chainId = await realCoinbase.request({ method: "eth_chainId" })
-          const networkName = getNetworkName(chainId)
-          
-          setWallet({
-            isConnected: true,
-            address,
-            balance: null,
-            isConnecting: false,
-            network: networkName,
-            chainId,
-          })
-          
-          updateBalance(address)
-          console.log("🎉 Coinbase Wallet conectada automaticamente!")
-          return
-        }
-      } catch (error: any) {
-        console.log("⚠️ Coinbase Wallet não está pronta:", error.message)
+        
+        return // PARA AQUI - não tenta conectar
       }
       
       console.log("✅ Coinbase Wallet encontrada, prosseguindo com conexão")
     }
-
+    
     const provider = detectWalletProvider(walletType)
     if (!provider) {
       alert("Por favor, instale uma carteira Ethereum compatível (MetaMask ou Coinbase Wallet).")
@@ -330,33 +307,22 @@ export function useWallet() {
     console.log("Iniciando conexão da carteira...")
     setWallet((prev) => ({ ...prev, isConnecting: true }))
 
-    // Timeout mais curto para permitir tentativas rápidas
-    const timeoutDuration = 15000 // 15s para todas as carteiras
+    // Configurar timeout (mais tempo para Coinbase Wallet)
+    const timeoutDuration = walletType === 'coinbase' ? 30000 : 15000 // 30s para Coinbase, 15s para outros
     const timeoutId = setTimeout(() => {
       console.log(`Timeout na conexão da carteira após ${timeoutDuration/1000}s`)
       setWallet((prev) => ({ ...prev, isConnecting: false }))
       
       if (walletType === 'coinbase') {
-        // Mostrar instruções específicas para Coinbase Wallet
-        const tryAgain = confirm(
-          "🔵 COINBASE WALLET DETECTADA MAS INATIVA\n\n" +
-            "AÇÃO NECESSÁRIA:\n" +
-            "1️⃣ Clique no ícone 🔵 da Coinbase Wallet no navegador\n" +
-            "2️⃣ Faça login se necessário\n" +
-            "3️⃣ Desbloqueie com sua senha\n" +
-            "4️⃣ Procure notificação de conexão pendente\n" +
-            "5️⃣ Aprove a conexão\n\n" +
-            "✅ Clique OK após ativar a Coinbase Wallet\n" +
-            "❌ Clique Cancelar para usar MetaMask"
+        alert(
+          "⏰ Timeout na conexão da Coinbase Wallet.\n\n" +
+            "A Coinbase Wallet pode demorar mais para responder.\n\n" +
+            "Verifique se:\n" +
+            "• A extensão está instalada e ativa\n" +
+            "• A carteira está desbloqueada\n" +
+            "• Não há outras abas usando a carteira\n\n" +
+            "Tente novamente ou use MetaMask."
         )
-        
-        if (tryAgain) {
-          // Tentar novamente imediatamente
-          setTimeout(() => {
-            console.log("🔄 Tentando Coinbase Wallet novamente...")
-            connect('coinbase')
-          }, 1000)
-        }
       } else {
         alert(
           "⏰ Timeout na conexão da carteira.\n\n" +
@@ -369,186 +335,17 @@ export function useWallet() {
       console.log(`Solicitando contas com provider: ${walletType || 'auto'}`)
       
       let accounts
-      
-      // Abordagem específica para cada tipo de carteira
-      if (walletType === 'coinbase') {
-        console.log("🔵 === DEBUG COINBASE WALLET ===")
-        console.log("🔵 Forçando conexão direta da Coinbase Wallet...")
-        
-        // DEBUG: Analisar ethereum object
-        const ethereum = (window as any).ethereum
-        console.log("🔍 Ethereum object:", {
-          exists: !!ethereum,
-          isMetaMask: ethereum?.isMetaMask,
-          isCoinbaseWallet: ethereum?.isCoinbaseWallet,
-          isCoinbase: ethereum?.isCoinbase,
-          providers: ethereum?.providers?.length || 0
-        })
-        
-        // DEBUG: Listar todos os providers
-        if (ethereum?.providers) {
-          console.log("🔍 Providers encontrados:")
-          ethereum.providers.forEach((p: any, index: number) => {
-            console.log(`Provider ${index}:`, {
-              isCoinbaseWallet: p.isCoinbaseWallet,
-              isCoinbase: p.isCoinbase,
-              isMetaMask: p.isMetaMask,
-              constructor: p.constructor?.name,
-              connectionType: p.connectionType
-            })
-          })
-        }
-        
-        // Usar provider Coinbase específico
-        let coinbaseProvider = null
-        
-        if (ethereum.providers && ethereum.providers.length > 0) {
-          coinbaseProvider = ethereum.providers.find((p: any) => p.isCoinbaseWallet === true)
-          console.log("🎯 Provider Coinbase encontrado:", !!coinbaseProvider)
-          
-          if (coinbaseProvider) {
-            console.log("🔍 Detalhes do provider Coinbase:", {
-              isCoinbaseWallet: coinbaseProvider.isCoinbaseWallet,
-              connectionType: coinbaseProvider.connectionType,
-              connected: coinbaseProvider.connected,
-              selectedAddress: coinbaseProvider.selectedAddress,
-              chainId: coinbaseProvider.chainId
-            })
-            
-            // DETECÇÃO INTELIGENTE: Se já conectada, forçar obtenção de contas
-            if (coinbaseProvider.connected && !coinbaseProvider.selectedAddress) {
-              console.log("🚨 COINBASE JÁ CONECTADA mas sem selectedAddress - forçando eth_accounts")
-              try {
-                console.log("⏳ Tentando eth_accounts com timeout de 2s...")
-                const existingAccounts = await Promise.race([
-                  coinbaseProvider.request({ method: "eth_accounts" }),
-                  new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("eth_accounts timeout")), 2000)
-                  )
-                ])
-                
-                if (existingAccounts && existingAccounts.length > 0) {
-                  console.log("✅ Contas encontradas via eth_accounts:", existingAccounts)
-                  const address = existingAccounts[0]
-                  
-                  console.log("⏳ Obtendo chainId...")
-                  const chainId = await Promise.race([
-                    coinbaseProvider.request({ method: "eth_chainId" }),
-                    new Promise((_, reject) => 
-                      setTimeout(() => reject(new Error("chainId timeout")), 2000)
-                    )
-                  ])
-                  
-                  const networkName = getNetworkName(chainId)
-                  
-                  setWallet({
-                    isConnected: true,
-                    address,
-                    balance: null,
-                    isConnecting: false,
-                    network: networkName,
-                    chainId,
-                  })
-                  
-                  updateBalance(address)
-                  console.log("🎉 Coinbase Wallet conectada automaticamente via eth_accounts!")
-                  return
-                } else {
-                  console.log("⚠️ eth_accounts retornou array vazio:", existingAccounts)
-                }
-              } catch (accountsError: any) {
-                console.log("⚠️ eth_accounts falhou:", accountsError.message)
-              }
-            }
-          }
-        }
-        
-        if (coinbaseProvider) {
-          console.log("🎯 Usando provider Coinbase específico")
-          console.log("🚀 Iniciando eth_requestAccounts...")
-          
-          try {
-            console.log("🚀 Iniciando conexão da Coinbase Wallet...")
-            
-            // WORKAROUND: Coinbase Wallet v3.123.0 - tentar enable() primeiro
-            if (coinbaseProvider.enable) {
-              console.log("🔧 Tentando enable() method...")
-              try {
-                accounts = await Promise.race([
-                  coinbaseProvider.enable(),
-                  new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("enable() timeout")), 5000)
-                  )
-                ])
-                console.log("✅ Coinbase Wallet conectada via enable()!", accounts)
-              } catch (enableError: any) {
-                console.log("⚠️ enable() falhou:", enableError.message)
-                
-                // Fallback para eth_requestAccounts com timeout curto
-                console.log("🔄 Tentando eth_requestAccounts como fallback...")
-                accounts = await Promise.race([
-                  coinbaseProvider.request({ 
-                    method: "eth_requestAccounts",
-                    params: [] 
-                  }),
-                  new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("eth_requestAccounts timeout")), 3000)
-                  )
-                ])
-                console.log("✅ Coinbase Wallet conectada via eth_requestAccounts!", accounts)
-              }
-            } else {
-              // Se não tem enable(), usar eth_requestAccounts com timeout
-              console.log("⏳ Aguardando resposta da Coinbase Wallet (timeout 3s)...")
-              accounts = await Promise.race([
-                coinbaseProvider.request({ 
-                  method: "eth_requestAccounts",
-                  params: [] 
-                }),
-                new Promise((_, reject) => 
-                  setTimeout(() => reject(new Error("eth_requestAccounts timeout")), 3000)
-                )
-              ])
-              console.log("✅ Coinbase Wallet conectada com sucesso!", accounts)
-            }
-          } catch (coinbaseError: any) {
-            console.log("❌ Erro na Coinbase Wallet:", coinbaseError.message)
-            
-            if (coinbaseError.code === 4001) {
-              alert(
-                "🔵 Conexão rejeitada pela Coinbase Wallet.\n\n" +
-                "SOLUÇÃO:\n" +
-                "1️⃣ Clique no ícone 🔵 da Coinbase Wallet\n" +
-                "2️⃣ Clique em 'Conectar' ou 'Connect'\n" +
-                "3️⃣ Aprove a conexão para este site\n" +
-                "4️⃣ Tente conectar novamente"
-              )
-            } else {
-              alert(
-                "🔵 Problema na Coinbase Wallet.\n\n" +
-                "SOLUÇÃO:\n" +
-                "1️⃣ Abra a extensão Coinbase Wallet\n" +
-                "2️⃣ Verifique se está desbloqueada\n" +
-                "3️⃣ Recarregue a página e tente novamente\n\n" +
-                "Ou use MetaMask como alternativa."
-              )
-            }
-            throw coinbaseError
-          }
+      try {
+        accounts = await provider.request({ method: "eth_requestAccounts" })
+      } catch (requestError: any) {
+        console.log("Tentativa com eth_requestAccounts falhou, tentando enable():", requestError)
+        if (provider.enable) {
+          accounts = await provider.enable()
         } else {
-          throw new Error("Provider Coinbase não encontrado")
-        }
-      } else {
-        // Para MetaMask e outras carteiras
-        console.log(`🦊 Conectando ${walletType || 'carteira detectada'}...`)
-        try {
-          accounts = await provider.request({ method: "eth_requestAccounts" })
-          console.log("✅ Conexão bem-sucedida!", accounts)
-        } catch (requestError: any) {
-          console.log("❌ Falha na conexão:", requestError.message)
           throw requestError
         }
-      } 
+      }
+
       clearTimeout(timeoutId) // Limpar timeout em caso de sucesso
 
       if (accounts && accounts.length > 0) {

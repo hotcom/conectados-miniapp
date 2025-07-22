@@ -9,8 +9,10 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Upload, ImageIcon, Wallet, AlertCircle } from "lucide-react"
-import { useWallet } from "@/hooks/use-wallet"
+import { Upload, ImageIcon, Wallet, AlertCircle, Loader2 } from "lucide-react"
+import { useWalletContext } from "@/contexts/wallet-context"
+import { CampaignFactory, ensureBaseSepoliaNetwork, formatBRL } from "@/lib/campaign-factory"
+import { ethers } from "ethers"
 
 export default function CreatePage() {
   const [title, setTitle] = useState("")
@@ -18,8 +20,9 @@ export default function CreatePage() {
   const [goal, setGoal] = useState("")
   const [image, setImage] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deploymentStatus, setDeploymentStatus] = useState<string>("") 
 
-  const { isConnected, address, connect } = useWallet()
+  const { isConnected, address, connect } = useWalletContext()
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -36,40 +39,111 @@ export default function CreatePage() {
     }
 
     setIsSubmitting(true)
+    setDeploymentStatus("Preparando dados...")
 
     try {
-      // Simulate blockchain transaction
+      // Process image if uploaded
+      let imageData: string | undefined = undefined
+      if (image) {
+        setDeploymentStatus("Processando imagem...")
+        imageData = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = (e) => resolve(e.target?.result as string)
+          reader.readAsDataURL(image)
+        })
+      }
+
+      // Get provider and ensure Base Sepolia network
+      setDeploymentStatus("Conectando à Base Sepolia...")
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      await ensureBaseSepoliaNetwork(provider)
+
+      // Create campaign on-chain
+      setDeploymentStatus("Criando campanha na blockchain...")
+      const campaignFactory = new CampaignFactory(provider)
+      
+      const onChainResult = await campaignFactory.createCampaign(
+        title,
+        description,
+        Number.parseFloat(goal),
+        address! // beneficiary is the connected wallet
+      )
+
+      console.log("Campaign created on-chain:", onChainResult)
+      setDeploymentStatus("Salvando dados localmente...")
+
+      // Create campaign data for local storage (now with on-chain info)
       const campaignData = {
+        id: `campaign_${Date.now()}`,
+        organizationId: address!,
         title,
         description,
         goal: Number.parseFloat(goal),
-        image: image?.name,
-        creator: address,
-        timestamp: Date.now(),
+        raised: 0,
+        donors: 0,
+        daysLeft: 30,
+        image: imageData,
+        walletAddress: address!,
+        createdAt: Date.now(),
+        status: 'active' as const,
+        // Contract address at root level for feed compatibility
+        contractAddress: onChainResult.campaignContract,
+        // On-chain data
+        onChain: {
+          campaignId: onChainResult.campaignId,
+          contractAddress: onChainResult.campaignContract,
+          transactionHash: onChainResult.transactionHash
+        }
       }
 
-      // In a real app, you would:
-      // 1. Upload image to IPFS
-      // 2. Create smart contract transaction
-      // 3. Store metadata on blockchain
+      console.log("Saving campaign data:", campaignData)
 
-      console.log("Creating campaign:", campaignData)
+      // Save to localStorage
+      const { storage } = await import('@/lib/storage')
+      storage.saveCampaign(campaignData)
 
-      // Simulate transaction delay
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      // Create a post for the campaign
+      const postData = {
+        id: `post_${Date.now()}`,
+        organizationId: address!,
+        campaignId: campaignData.id,
+        content: `🚀 Nova campanha criada: ${title}\n\n${description}\n\n💰 Meta: ${formatBRL(goal)}\n🔗 Contrato: ${onChainResult.campaignContract}`,
+        image: imageData,
+        createdAt: Date.now(),
+        likes: 0,
+        shares: 0
+      }
+      storage.savePost(postData)
 
-      alert("Campanha criada com sucesso na blockchain!")
+      setDeploymentStatus("Finalizando...")
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
+      alert(`🎉 Campanha criada com SUCESSO!\n\n📋 Detalhes:\n• ID da Campanha: ${onChainResult.campaignId}\n• Contrato: ${onChainResult.campaignContract}\n• Transação: ${onChainResult.transactionHash}\n• Meta: ${formatBRL(goal)}\n\n🔗 Visualizar no BaseScan:\nhttps://sepolia.basescan.org/tx/${onChainResult.transactionHash}`)
 
       // Reset form
       setTitle("")
       setDescription("")
       setGoal("")
       setImage(null)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating campaign:", error)
-      alert("Erro ao criar campanha. Tente novamente.")
+      
+      let errorMessage = "Erro ao criar campanha. Tente novamente."
+      
+      if (error.message.includes('user rejected')) {
+        errorMessage = "Transação cancelada pelo usuário."
+      } else if (error.message.includes('insufficient funds')) {
+        errorMessage = "Saldo insuficiente para pagar o gas da transação."
+      } else if (error.message.includes('network')) {
+        errorMessage = "Erro de rede. Verifique sua conexão e tente novamente."
+      } else if (error.message) {
+        errorMessage = `Erro: ${error.message}`
+      }
+      
+      alert(errorMessage)
     } finally {
       setIsSubmitting(false)
+      setDeploymentStatus("")
     }
   }
 
@@ -90,7 +164,7 @@ export default function CreatePage() {
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="flex items-center justify-between">
                   <span>Você precisa conectar sua carteira para criar uma campanha.</span>
-                  <Button onClick={connect} size="sm" className="ml-4">
+                  <Button onClick={() => connect()} size="sm" className="ml-4">
                     <Wallet className="w-4 h-4 mr-2" />
                     Conectar Carteira
                   </Button>
@@ -176,8 +250,19 @@ export default function CreatePage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={!isConnected || isSubmitting}>
-                {isSubmitting ? "Criando na Blockchain..." : "Criar Campanha"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isSubmitting || !title || !description || !goal}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {deploymentStatus || "Criando..."}
+                  </>
+                ) : (
+                  "🚀 Criar Campanha On-Chain"
+                )}
               </Button>
             </form>
           </CardContent>

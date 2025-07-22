@@ -3,44 +3,56 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Globe, Calendar, Wallet } from "lucide-react"
+import { type Organization, storage } from "@/lib/storage"
 
-export function ProfileHeader() {
+interface ProfileHeaderProps {
+  organization: Organization
+}
+
+export function ProfileHeader({ organization }: ProfileHeaderProps) {
   return (
     <Card className="mb-8">
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row gap-6">
           <Avatar className="w-32 h-32 mx-auto md:mx-0">
-            <AvatarImage src="/placeholder.svg?height=128&width=128" />
-            <AvatarFallback className="text-2xl">ICF</AvatarFallback>
+            <AvatarImage src={organization.avatar || "/placeholder.svg?height=128&width=128"} />
+            <AvatarFallback className="text-2xl">
+              {organization.name.substring(0, 2).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
 
           <div className="flex-1 text-center md:text-left">
             <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-              <h1 className="text-2xl font-bold">Instituto Criança Feliz</h1>
+              <h1 className="text-2xl font-bold">{organization.name}</h1>
               <div className="flex gap-2 justify-center md:justify-start">
-                <Badge variant="secondary">Verificado</Badge>
+                {organization.verified && <Badge variant="secondary">Verificado</Badge>}
                 <Badge variant="outline">ONG</Badge>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-6 justify-center md:justify-start mb-4 text-sm text-gray-600">
-              <div className="flex items-center gap-1">
-                <MapPin className="w-4 h-4" />
-                São Paulo, SP
-              </div>
-              <div className="flex items-center gap-1">
-                <Globe className="w-4 h-4" />
-                www.criancafeliz.org.br
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                Desde 2015
-              </div>
+              {organization.location && (
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  {organization.location}
+                </div>
+              )}
+              {organization.website && (
+                <div className="flex items-center gap-1">
+                  <Globe className="w-4 h-4" />
+                  {organization.website}
+                </div>
+              )}
+              {organization.foundedYear && (
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  Desde {organization.foundedYear}
+                </div>
+              )}
             </div>
 
             <p className="text-gray-700 mb-4 max-w-2xl">
-              Trabalhamos para garantir direitos básicos às crianças em situação de vulnerabilidade social. Nossa missão
-              é proporcionar educação, alimentação e cuidados essenciais para um futuro melhor.
+              {organization.description}
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center md:justify-start mb-4">

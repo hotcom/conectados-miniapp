@@ -25,7 +25,11 @@ interface Post {
   timestamp: string
   goal: number
   raised: number
+  progressPercentage?: number
+  contractAddress?: string
   walletAddress: string
+  isWalletConnected?: boolean
+  donorCount?: number
 }
 
 interface PostCardProps {
@@ -35,6 +39,15 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const [liked, setLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(post.likes)
+
+  // Debug: Log campaign data
+  console.log('📊 PostCard dados da campanha:', {
+    id: post.id,
+    goal: post.goal,
+    raised: post.raised,
+    progressPercentage: post.progressPercentage,
+    contractAddress: post.contractAddress
+  })
 
   const progressPercentage = (post.raised / post.goal) * 100
 
@@ -99,22 +112,57 @@ export function PostCard({ post }: PostCardProps) {
         </div>
 
         <div className="w-full text-left">
-          <p className="font-semibold text-sm mb-1">{likesCount.toLocaleString()} curtidas</p>
+          <p className="font-semibold text-sm mb-1">{likesCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} curtidas</p>
           <p className="text-sm">
             <span className="font-semibold">{post.organization.username}</span> {post.content}
           </p>
         </div>
 
         <div className="w-full bg-gray-50 rounded-lg p-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">Meta de arrecadação</span>
-            <span className="text-sm text-gray-600">{progressPercentage.toFixed(0)}%</span>
-          </div>
-          <Progress value={progressPercentage} className="mb-2" />
-          <div className="flex justify-between text-sm">
-            <span className="text-green-600 font-semibold">{formatCurrency(post.raised)} arrecadados</span>
-            <span className="text-gray-600">de {formatCurrency(post.goal)}</span>
-          </div>
+          {/* Check if wallet is connected AND we have contract address */}
+          {post.contractAddress && post.isWalletConnected ? (
+            // Show actual progress when wallet connected and we have contract data
+            <>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Meta de arrecadação</span>
+                <span className="text-sm text-gray-600">{progressPercentage.toFixed(0)}%</span>
+              </div>
+              <Progress value={progressPercentage} className="mb-2" />
+              <div className="flex justify-between text-sm">
+                <span className="text-green-600 font-semibold">{formatCurrency(post.raised)} arrecadados</span>
+                <span className="text-gray-600">de {formatCurrency(post.goal)}</span>
+              </div>
+            </>
+          ) : (
+            // Show different messages based on wallet connection and contract state
+            <>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Meta de arrecadação</span>
+                <span className="text-sm text-blue-600">🔗 On-chain</span>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+                <div className="flex items-center gap-2 text-blue-700">
+                  {!post.isWalletConnected ? (
+                    <span className="text-sm">🔒 Conecte sua carteira para ver o progresso desta campanha</span>
+                  ) : !post.contractAddress ? (
+                    <span className="text-sm">⚠️ Esta campanha não possui contrato on-chain ativo</span>
+                  ) : (
+                    <span className="text-sm">🔄 Carregando dados on-chain...</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Meta: {formatCurrency(post.goal)}</span>
+                {!post.isWalletConnected ? (
+                  <span className="text-blue-600">Dados on-chain disponíveis</span>
+                ) : !post.contractAddress ? (
+                  <span className="text-orange-600">Campanha local</span>
+                ) : (
+                  <span className="text-blue-600">Dados on-chain</span>
+                )}
+              </div>
+            </>
+          )}
           <Link href={`/donate/${post.id}`}>
             <Button className="w-full mt-3 bg-green-600 hover:bg-green-700">Doar Agora</Button>
           </Link>
