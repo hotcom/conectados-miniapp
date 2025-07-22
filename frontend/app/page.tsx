@@ -1,16 +1,10 @@
+"use client"
+
 import { Header } from "@/components/header"
 import { Feed } from "@/components/feed"
 import { Sidebar } from "@/components/sidebar"
-import { useEffect, useState } from "react"
 
 export default function HomePage() {
-  const [version, setVersion] = useState('')
-
-  useEffect(() => {
-    // Add logic to fetch or retrieve the version number
-    // For demonstration purposes, a static version number is used
-    setVersion('v1.0.0')
-  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
