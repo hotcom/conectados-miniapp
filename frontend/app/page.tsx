@@ -1,8 +1,17 @@
 import { Header } from "@/components/header"
 import { Feed } from "@/components/feed"
 import { Sidebar } from "@/components/sidebar"
+import { useEffect, useState } from "react"
 
 export default function HomePage() {
+  const [version, setVersion] = useState('')
+
+  useEffect(() => {
+    // Add logic to fetch or retrieve the version number
+    // For demonstration purposes, a static version number is used
+    setVersion('v1.0.0')
+  }, [])
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -55,6 +64,14 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      
+      {/* Version Footer */}
+      <footer className="bg-white border-t border-gray-200 py-2 px-4">
+        <div className="container mx-auto flex justify-between items-center text-xs text-gray-500">
+          <span>Conectados MiniApp</span>
+          <span id="version-info">v1.0.3 - Build 2025-01-22-07:20</span>
+        </div>
+      </footer>
     </div>
   )
 }
