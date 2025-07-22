@@ -10,9 +10,7 @@ const nextConfig = {
     unoptimized: true,
   },
   // MiniApp optimizations
-  experimental: {
-    appDir: true,
-  },
+  // Note: appDir is now default in Next.js 13+ and removed in 15+
   // PWA-like features for MiniApp
   async headers() {
     return [
