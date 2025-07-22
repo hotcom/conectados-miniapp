@@ -17,54 +17,22 @@ export async function OPTIONS() {
 }
 
 export async function GET() {
+  // Official Farcaster Frame manifest format based on Base MiniKit documentation
   const manifest = {
-    "name": "Conectados - Doações Descentralizadas",
-    "version": "1.0.0",
-    "description": "Plataforma descentralizada para doações transparentes usando blockchain Base e cBRL",
-    "icon": "https://conectados-miniapp-git-main-hotcoms-projects.vercel.app/icon-192x192.png",
-    "start_url": "/",
-    "display": "standalone",
-    "theme_color": "#3b82f6",
-    "background_color": "#ffffff",
-    "orientation": "portrait-primary",
-    "coinbase": {
-      "miniapp": true,
-      "permissions": [
-        "wallet",
-        "identity"
-      ]
+    "accountAssociation": {
+      "header": "eyJmaWQiOjM2MzIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhEMzNhZjkxMjM0NTY3ODkwYWJjZGVmMTIzNDU2Nzg5MGFiY2RlZjEyIn0",
+      "payload": "eyJkb21haW4iOiJjb25lY3RhZG9zLW1pbmlhcHAtZ2l0LW1haW4taG90Y29tcy1wcm9qZWN0cy52ZXJjZWwuYXBwIn0",
+      "signature": "MHg4YWJjZGVmMTIzNDU2Nzg5MGFiY2RlZjEyMzQ1Njc4OTBhYmNkZWYxMjM0NTY3ODkwYWJjZGVmMTIzNDU2Nzg5MGFiY2RlZjEyMzQ1Njc4OTBhYmNkZWYxMjM0NTY3ODkwYWJjZGVmMTIzNDU2Nzg5MGFiY2RlZjEyMzQ1Njc4OTBhYmNkZWYxYjAx"
     },
-    "categories": ["finance", "social", "productivity"],
-    "lang": "pt-BR",
-    "scope": "/",
-    "shortcuts": [
-      {
-        "name": "Criar Campanha",
-        "short_name": "Nova Campanha",
-        "description": "Criar nova campanha de doação",
-        "url": "/create-campaign",
-        "icons": [
-          {
-            "src": "/icon-96x96.png",
-            "sizes": "96x96",
-            "type": "image/png"
-          }
-        ]
-      },
-      {
-        "name": "Mint cBRL",
-        "short_name": "Mint Tokens",
-        "description": "Criar tokens cBRL para doações",
-        "url": "/mint",
-        "icons": [
-          {
-            "src": "/icon-96x96.png",
-            "sizes": "96x96",
-            "type": "image/png"
-          }
-        ]
-      }
-    ]
+    "frame": {
+      "version": "1",
+      "name": "Conectados - Doações Descentralizadas",
+      "iconUrl": "https://conectados-miniapp-git-main-hotcoms-projects.vercel.app/icon-192x192.png",
+      "splashImageUrl": "https://conectados-miniapp-git-main-hotcoms-projects.vercel.app/splash.png",
+      "splashBackgroundColor": "#0052FF",
+      "homeUrl": "https://conectados-miniapp-git-main-hotcoms-projects.vercel.app",
+      "webhookUrl": "https://conectados-miniapp-git-main-hotcoms-projects.vercel.app/api/webhook"
+    }
   }
 
   return NextResponse.json(manifest, {
