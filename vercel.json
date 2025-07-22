@@ -1,5 +1,7 @@
 {
   "name": "conectados-miniapp",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
@@ -36,6 +38,14 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=3600"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        },
+        {
+          "key": "Vercel-No-Auth",
+          "value": "1"
         }
       ]
     },
@@ -69,6 +79,10 @@
     {
       "source": "/miniapp-manifest.json",
       "destination": "/api/miniapp-manifest"
+    },
+    {
+      "source": "/.well-known/farcaster.json",
+      "destination": "/api/farcaster-manifest"
     }
   ],
   "env": {
