@@ -58,9 +58,12 @@ export async function GET(request: NextRequest) {
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=3600',
+      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
       'X-Robots-Tag': 'noindex',
-      'Vercel-No-Auth': '1'
+      'Vercel-No-Auth': '1',
+      'X-Timestamp': Date.now().toString()
     },
   })
 }
