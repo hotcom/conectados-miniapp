@@ -6,11 +6,11 @@
   },
   "frame": {
     "version": "1",
-    "name": "Conectados",
-    "iconUrl": "https://conectados-miniapp.vercel.app/icon-192x192.png",
-    "splashImageUrl": "https://conectados-miniapp.vercel.app/splash.png",
+    "name": "DoeAgora",
+    "iconUrl": "https://doeagora.vercel.app/icon-192x192.png",
+    "splashImageUrl": "https://doeagora.vercel.app/splash.png",
     "splashBackgroundColor": "#0052FF",
-    "homeUrl": "https://conectados-miniapp.vercel.app",
-    "webhookUrl": "https://conectados-miniapp.vercel.app/api/webhook"
+    "homeUrl": "https://doeagora.vercel.app",
+    "webhookUrl": "https://doeagora.vercel.app/api/webhook"
   }
 }
