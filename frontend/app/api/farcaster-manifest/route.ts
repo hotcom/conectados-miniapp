@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     },
     "frame": {
       "version": "1",
-      "name": "Conectados - Doações",
+      "name": "Conectados",
       "iconUrl": `${baseUrl}/icon-192x192.png`,
       "splashImageUrl": `${baseUrl}/splash.png`,
       "splashBackgroundColor": "#0052FF",
