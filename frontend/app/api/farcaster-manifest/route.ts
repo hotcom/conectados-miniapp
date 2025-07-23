@@ -24,6 +24,7 @@ export async function OPTIONS() {
 }
 
 export async function GET(request: NextRequest) {
+  // Force production cache invalidation - 2025-01-22
   // Get the current host to use in URLs
   const host = request.headers.get('host') || 'conectados-miniapp.vercel.app';
   const protocol = host.includes('localhost') ? 'http' : 'https';
