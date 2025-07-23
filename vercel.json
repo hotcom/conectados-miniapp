@@ -79,7 +79,7 @@
     },
     {
       "source": "/.well-known/farcaster.json",
-      "destination": "/api/farcaster-manifest"
+      "destination": "/api/farcaster-manifest-v2"
     }
   ],
   "env": {
