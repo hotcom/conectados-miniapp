@@ -1,0 +1,11 @@
+{
+  "frame": {
+    "version": "1",
+    "name": "DoeAgora",
+    "iconUrl": "https://hotcom.github.io/conectados-miniapp/icon-192x192.png",
+    "splashImageUrl": "https://hotcom.github.io/conectados-miniapp/splash.png",
+    "splashBackgroundColor": "#0052FF",
+    "homeUrl": "https://hotcom.github.io/conectados-miniapp",
+    "webhookUrl": "https://hotcom.github.io/conectados-miniapp/api/webhook"
+  }
+}
