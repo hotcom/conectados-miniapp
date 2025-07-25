@@ -289,21 +289,45 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const autoConnectInSuperApp = async () => {
       // Only auto-connect if:
-      // 1. Running inside Coinbase Super App
+      // 1. Running inside Coinbase Super App (verified)
       // 2. Not already connected
       // 3. Not currently connecting
-      if (isInCoinbaseApp && !wallet.isConnected && !wallet.isConnecting) {
+      // 4. Window ethereum is available
+      if (isInCoinbaseApp && !wallet.isConnected && !wallet.isConnecting && typeof window !== 'undefined' && window.ethereum) {
         console.log('🚀 Auto-connecting wallet in Coinbase Super App...')
+        console.log('🔍 SuperApp detection details:', {
+          userAgent: navigator.userAgent,
+          hostname: window.location.hostname,
+          referrer: document.referrer
+        })
+        
         try {
           await connect('coinbase')
+          
+          // After connecting, ensure we're on the correct network
+          setTimeout(async () => {
+            if (!isCorrectNetwork) {
+              console.log('🔄 Switching to Base Sepolia network...')
+              try {
+                await addBaseSepolia()
+              } catch (networkError) {
+                console.log('⚠️ Could not switch network automatically:', networkError)
+              }
+            }
+          }, 2000)
+          
         } catch (error) {
           console.log('⚠️ Auto-connect failed, user will need to connect manually:', error)
+          // Reset connecting state on failure
+          setWallet(prev => ({ ...prev, isConnecting: false }))
         }
+      } else if (!isInCoinbaseApp) {
+        console.log('🌐 Running in regular browser - manual connection required')
       }
     }
 
     // Wait a bit for the app to initialize
-    const timer = setTimeout(autoConnectInSuperApp, 1000)
+    const timer = setTimeout(autoConnectInSuperApp, 1500)
     return () => clearTimeout(timer)
   }, [isInCoinbaseApp, wallet.isConnected, wallet.isConnecting])
 

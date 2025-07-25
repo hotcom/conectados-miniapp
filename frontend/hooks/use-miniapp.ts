@@ -23,25 +23,20 @@ export function useMiniApp(): MiniAppEnvironment {
     const userAgent = navigator.userAgent
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
     
-    // Enhanced detection for Coinbase Super App
+    // More precise detection for Coinbase Super App
     const isInCoinbaseApp = (
-      // User Agent checks
-      userAgent.includes('CoinbaseWallet') || 
-      userAgent.includes('Coinbase') ||
-      userAgent.includes('CBWallet') ||
-      // URL checks
-      window.location.hostname.includes('coinbase') ||
-      // Window object checks
-      !!(window as any).coinbase ||
-      !!(window as any).CoinbaseWalletSDK ||
-      // Ethereum provider checks
-      (typeof (window as any).ethereum !== 'undefined' && 
-       ((window as any).ethereum.isCoinbaseWallet === true ||
-        (window as any).ethereum.isCoinbase === true)) ||
-      // Referrer checks
-      document.referrer.includes('coinbase') ||
+      // Primary: Check if running in actual Coinbase app (not just extension)
+      (userAgent.includes('CoinbaseWallet') && isMobile) ||
+      (userAgent.includes('Coinbase') && userAgent.includes('Mobile')) ||
+      // Secondary: URL-based detection (when hosted by Coinbase)
+      window.location.hostname.includes('coinbase.com') ||
+      // Tertiary: Referrer from Coinbase app (not extension)
+      (document.referrer.includes('coinbase') && !document.referrer.includes('chrome-extension')) ||
       // Manual override for testing
-      window.location.search.includes('coinbase=true')
+      window.location.search.includes('coinbase=true') ||
+      // Check for specific Coinbase app environment variables
+      !!(window as any).CoinbaseAppSDK ||
+      (typeof (window as any).ReactNativeWebView !== 'undefined')
     )
 
     // Check if it's a MiniApp environment

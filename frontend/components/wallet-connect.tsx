@@ -49,9 +49,18 @@ export function WalletConnect() {
 
   const connectWithWallet = async (walletType?: 'metamask' | 'coinbase') => {
     try {
+      console.log(`🔌 Attempting to connect with ${walletType || 'auto-detect'}`)
       await connect(walletType)
+      console.log('✅ Wallet connected successfully')
     } catch (error) {
-      console.error('Erro ao conectar carteira:', error)
+      console.error('❌ Erro ao conectar carteira:', error)
+      // Force reset connecting state on error
+      setTimeout(() => {
+        if (wallet.isConnecting) {
+          console.log('🔄 Forcing reset of connecting state after error')
+          wallet.disconnect() // This will reset the state
+        }
+      }, 2000)
     }
   }
 
@@ -89,6 +98,22 @@ export function WalletConnect() {
               </span>
             )}
           </Button>
+          
+          {/* Emergency reset button - only show if stuck connecting for too long */}
+          {isConnecting && (
+            <Button 
+              onClick={() => {
+                console.log('🚨 Emergency reset of wallet state')
+                disconnect()
+              }}
+              variant="outline"
+              size="sm"
+              className="text-red-600 border-red-200 hover:bg-red-50"
+              title="Reset se travou"
+            >
+              ✕
+            </Button>
+          )}
         </div>
         
         <WalletSelectionModal 
