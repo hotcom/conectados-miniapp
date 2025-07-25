@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { useMiniApp } from '../hooks/use-miniapp'
 
 interface WalletState {
   isConnected: boolean
@@ -50,6 +51,7 @@ const getNetworkName = (chainId: string) => {
 }
 
 export function WalletProvider({ children }: { children: ReactNode }) {
+  const { isInCoinbaseApp, isMiniApp } = useMiniApp()
   const [wallet, setWallet] = useState<WalletState>({
     isConnected: false,
     address: null,
@@ -282,6 +284,28 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       throw error
     }
   }
+
+  // Auto-connect when running inside Coinbase Super App
+  useEffect(() => {
+    const autoConnectInSuperApp = async () => {
+      // Only auto-connect if:
+      // 1. Running inside Coinbase Super App
+      // 2. Not already connected
+      // 3. Not currently connecting
+      if (isInCoinbaseApp && !wallet.isConnected && !wallet.isConnecting) {
+        console.log('🚀 Auto-connecting wallet in Coinbase Super App...')
+        try {
+          await connect('coinbase')
+        } catch (error) {
+          console.log('⚠️ Auto-connect failed, user will need to connect manually:', error)
+        }
+      }
+    }
+
+    // Wait a bit for the app to initialize
+    const timer = setTimeout(autoConnectInSuperApp, 1000)
+    return () => clearTimeout(timer)
+  }, [isInCoinbaseApp, wallet.isConnected, wallet.isConnecting])
 
   return (
     <WalletContext.Provider
