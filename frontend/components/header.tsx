@@ -1,25 +1,42 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Search, Heart, MessageCircle, PlusSquare, User, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { WalletConnect } from "@/components/wallet-connect"
 import { useWalletContext } from "@/contexts/wallet-context"
-import { storage } from "@/lib/storage"
+import { firebaseStorage } from "@/lib/firebase-storage"
 
 export function Header() {
   const wallet = useWalletContext()
   const [searchQuery, setSearchQuery] = useState("")
+  const [hasProfile, setHasProfile] = useState(false)
   const isConnected = wallet.isConnected
   const address = wallet.address
 
   // Check if user has organization profile
-  const hasProfile = isConnected && address ? 
-    storage.getOrganizations().some(org => 
-      org.walletAddress.toLowerCase() === address.toLowerCase()
-    ) : false
+  useEffect(() => {
+    const checkProfile = async () => {
+      if (isConnected && address) {
+        try {
+          const organizations = await firebaseStorage.getOrganizations()
+          const userHasProfile = organizations.some((org: any) => 
+            org.walletAddress.toLowerCase() === address.toLowerCase()
+          )
+          setHasProfile(userHasProfile)
+        } catch (error) {
+          console.error('Error checking profile:', error)
+          setHasProfile(false)
+        }
+      } else {
+        setHasProfile(false)
+      }
+    }
+    
+    checkProfile()
+  }, [isConnected, address])
 
   const handleLikesClick = () => {
     // TODO: Implement likes/favorites page

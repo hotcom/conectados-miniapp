@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { PostCard } from "@/components/post-card"
 import { Card, CardContent } from "@/components/ui/card"
 import { Heart, Users, MessageCircle, RefreshCw, Database } from "lucide-react"
-import { storage, type Post, type Organization } from "@/lib/storage"
+import { firebaseStorage, type Post, type Organization } from "@/lib/firebase-storage"
 import { useWalletContext } from "@/contexts/wallet-context"
 import { Campaign } from "@/lib/campaign-factory"
 import { loadCampaignsFromBlockchain, createPostsFromCampaigns, isWalletConnected } from "@/lib/blockchain-campaigns"
@@ -34,11 +34,11 @@ export function Feed() {
       // Create posts from blockchain campaigns
       const blockchainPosts = createPostsFromCampaigns(blockchainCampaigns)
       
-      // Also load localStorage posts (for backward compatibility)
-      const localPosts = storage.getPosts()
+      // Also load Firebase posts (for backward compatibility)
+      const firebasePosts = await firebaseStorage.getPosts()
       
       // Combine and deduplicate posts
-      const allPosts = [...blockchainPosts, ...localPosts]
+      const allPosts = [...blockchainPosts, ...firebasePosts]
       const uniquePosts = allPosts.filter((post, index, self) => 
         index === self.findIndex(p => p.id === post.id)
       )
@@ -48,11 +48,11 @@ export function Feed() {
       
     } catch (error) {
       console.error('❌ Error loading blockchain campaigns:', error)
-      // Fallback to localStorage only
-      const localPosts = storage.getPosts()
-      const localCampaigns = storage.getCampaigns()
-      setPosts(localPosts)
-      setCampaigns(localCampaigns)
+      // Fallback to Firebase only
+      const firebasePosts = await firebaseStorage.getPosts()
+      const firebaseCampaigns = await firebaseStorage.getCampaigns()
+      setPosts(firebasePosts)
+      setCampaigns(firebaseCampaigns)
     } finally {
       setIsLoadingBlockchain(false)
     }
@@ -127,13 +127,13 @@ export function Feed() {
         console.log('💰 Wallet detected, loading from blockchain...')
         await loadBlockchainCampaigns()
       } else {
-        console.log('📱 No wallet, loading from localStorage...')
-        // Fallback to localStorage when no wallet
-        const storedPosts = storage.getPosts()
-        const storedCampaigns = storage.getCampaigns()
-        const storedOrganizations = storage.getOrganizations()
+        console.log('📱 No wallet, loading from Firebase...')
+        // Fallback to Firebase when no wallet
+        const storedPosts = await firebaseStorage.getPosts()
+        const storedCampaigns = await firebaseStorage.getCampaigns()
+        const storedOrganizations = await firebaseStorage.getOrganizations()
         
-        console.log('📊 Loaded from storage:', {
+        console.log('📊 Loaded from Firebase:', {
           posts: storedPosts.length,
           campaigns: storedCampaigns.length,
           organizations: storedOrganizations.length
@@ -212,7 +212,7 @@ export function Feed() {
       likes: post.likes,
       comments: 0, // We don't have comments system yet
       shares: post.shares,
-      timestamp: new Date(post.createdAt).toLocaleDateString('pt-BR'),
+      timestamp: new Date(typeof post.createdAt === 'number' ? post.createdAt : post.createdAt.toMillis()).toLocaleDateString('pt-BR'),
       goal: onChainCampaign?.goal || campaign?.goal || 0,
       raised: onChainCampaign?.raised || campaign?.raised || 0,
       progressPercentage: onChainCampaign?.progressPercentage || 0,

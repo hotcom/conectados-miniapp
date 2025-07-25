@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Plus, User, Wallet } from "lucide-react"
 import { useWalletContext } from "@/contexts/wallet-context"
-import { storage, type Organization } from "@/lib/storage"
+import { firebaseStorage, type Organization } from "@/lib/firebase-storage"
 
 export function Sidebar() {
   const wallet = useWalletContext()
@@ -28,21 +28,26 @@ export function Sidebar() {
   }, [isConnected, address, currentOrg])
 
   // Check for organization when wallet connects or address changes
-  const checkForOrganization = useCallback(() => {
+  const checkForOrganization = useCallback(async () => {
     console.log('Checking for organization - isConnected:', isConnected, 'address:', address)
     
     if (isConnected && address) {
-      const organizations = storage.getOrganizations()
-      console.log('Available organizations:', organizations)
-      
-      const userOrg = organizations.find(org => {
-        const match = org.walletAddress.toLowerCase() === address.toLowerCase()
-        console.log(`Comparing ${org.walletAddress.toLowerCase()} === ${address.toLowerCase()}: ${match}`)
-        return match
-      })
-      
-      console.log('Found userOrg:', userOrg)
-      setCurrentOrg(userOrg || null)
+      try {
+        const organizations = await firebaseStorage.getOrganizations()
+        console.log('Available organizations:', organizations)
+        
+        const userOrg = organizations.find((org: Organization) => {
+          const match = org.walletAddress.toLowerCase() === address.toLowerCase()
+          console.log(`Comparing ${org.walletAddress.toLowerCase()} === ${address.toLowerCase()}: ${match}`)
+          return match
+        })
+        
+        console.log('Found userOrg:', userOrg)
+        setCurrentOrg(userOrg || null)
+      } catch (error) {
+        console.error('Error loading organizations:', error)
+        setCurrentOrg(null)
+      }
       setLastAddress(address)
     } else {
       console.log('Wallet not connected, clearing organization')

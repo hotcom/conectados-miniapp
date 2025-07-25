@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Plus, Heart, MessageCircle } from "lucide-react"
-import { type Organization, type Post, storage } from "@/lib/storage"
+import { type Organization, type Post, firebaseStorage } from "@/lib/firebase-storage"
 
 interface ProfilePostsProps {
   organization: Organization
@@ -14,9 +14,17 @@ export function ProfilePosts({ organization }: ProfilePostsProps) {
   const [posts, setPosts] = useState<Post[]>([])
 
   useEffect(() => {
-    // Load posts for this organization
-    const organizationPosts = storage.getPostsByOrganization(organization.id)
-    setPosts(organizationPosts)
+    const loadPosts = async () => {
+      try {
+        // Load posts for this organization
+        const organizationPosts = await firebaseStorage.getPostsByOrganization(organization.id)
+        setPosts(organizationPosts)
+      } catch (error) {
+        console.error('Error loading posts:', error)
+      }
+    }
+    
+    loadPosts()
   }, [organization.id])
 
   return (
@@ -75,7 +83,7 @@ export function ProfilePosts({ organization }: ProfilePostsProps) {
                       </button>
                     </div>
                     <span className="text-sm text-gray-500">
-                      {new Date(post.createdAt).toLocaleDateString('pt-BR')}
+                      {new Date(typeof post.createdAt === 'number' ? post.createdAt : post.createdAt.toMillis()).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
                 </div>

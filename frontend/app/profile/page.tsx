@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Building2, Plus } from "lucide-react"
 import { useWalletContext } from "@/contexts/wallet-context"
-import { storage, type Organization } from "@/lib/storage"
+import { firebaseStorage, type Organization } from "@/lib/firebase-storage"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -18,32 +18,43 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!isConnected) {
-      router.push('/')
-      return
-    }
+    const loadProfile = async () => {
+      if (!isConnected) {
+        router.push('/')
+        return
+      }
 
-    // Try to get current user organization
-    let currentOrg = storage.getCurrentOrganization()
-    
-    // If no current user set, try to find by wallet address
-    if (!currentOrg && address) {
-      currentOrg = storage.getOrganizations().find(org => 
-        org.walletAddress.toLowerCase() === address.toLowerCase()
-      ) || null
-      
-      if (currentOrg) {
-        storage.setCurrentUser(currentOrg.id)
+      try {
+        // Try to get current user organization
+        let currentOrg = await firebaseStorage.getCurrentOrganization()
+        
+        // If no current user set, try to find by wallet address
+        if (!currentOrg && address) {
+          const organizations = await firebaseStorage.getOrganizations()
+          currentOrg = organizations.find((org: Organization) => 
+            org.walletAddress.toLowerCase() === address.toLowerCase()
+          ) || null
+          
+          if (currentOrg) {
+            await firebaseStorage.setCurrentUser(currentOrg.id)
+          }
+        }
+
+        setOrganization(currentOrg)
+        
+        // If no organization found, redirect to setup
+        if (!currentOrg) {
+          router.push('/setup-profile')
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error)
+        router.push('/setup-profile')
+      } finally {
+        setLoading(false)
       }
     }
 
-    setOrganization(currentOrg)
-    setLoading(false)
-
-    // If no organization found, redirect to setup
-    if (!currentOrg) {
-      router.push('/setup-profile')
-    }
+    loadProfile()
   }, [isConnected, address, router])
 
   if (loading) {

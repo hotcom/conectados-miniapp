@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Globe, Calendar, Wallet } from "lucide-react"
-import { type Organization, storage } from "@/lib/storage"
+import { type Organization } from "@/lib/firebase-storage"
 
 interface ProfileHeaderProps {
   organization: Organization
