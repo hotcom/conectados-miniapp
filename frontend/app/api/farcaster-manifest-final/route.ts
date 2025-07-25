@@ -5,11 +5,11 @@ export async function GET() {
     "frame": {
       "version": "1",
       "name": "DoeAgora",
-      "iconUrl": "https://doeagora.vercel.app/icon-192x192.png",
-      "splashImageUrl": "https://doeagora.vercel.app/splash.png",
+      "iconUrl": "https://doeagora-eight.vercel.app/icon-192x192.png",
+      "splashImageUrl": "https://doeagora-eight.vercel.app/splash.png",
       "splashBackgroundColor": "#0052FF",
-      "homeUrl": "https://doeagora.vercel.app",
-      "webhookUrl": "https://doeagora.vercel.app/api/webhook"
+      "homeUrl": "https://doeagora-eight.vercel.app",
+      "webhookUrl": "https://doeagora-eight.vercel.app/api/webhook"
     }
   };
 
