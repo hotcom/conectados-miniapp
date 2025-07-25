@@ -1,5 +1,7 @@
 {
-  "name": "doeagora-miniapp",
+  "name": "conectados-miniapp",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
@@ -7,6 +9,40 @@
         {
           "key": "X-Frame-Options",
           "value": "ALLOWALL"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/.well-known/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        },
+        {
+          "key": "Vercel-No-Auth",
+          "value": "1"
         }
       ]
     },
