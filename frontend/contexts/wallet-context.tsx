@@ -85,7 +85,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       const handleChainChanged = (chainId: string) => {
         console.log('🔄 Chain changed:', chainId)
+        console.log('🔍 Network detection details:', {
+          chainId,
+          chainIdUpperCase: chainId.toUpperCase(),
+          expectedChainId: BASE_SEPOLIA_CONFIG.chainId,
+          expectedChainIdUpperCase: BASE_SEPOLIA_CONFIG.chainId.toUpperCase(),
+          isMatch: chainId.toUpperCase() === BASE_SEPOLIA_CONFIG.chainId.toUpperCase()
+        })
         const networkName = getNetworkName(chainId)
+        console.log('🌐 Network name:', networkName)
         setWallet(prev => ({ ...prev, chainId, network: networkName }))
       }
 
@@ -199,7 +207,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       if (accounts && accounts.length > 0) {
         const chainId = await provider.request({ method: 'eth_chainId' })
         const networkName = getNetworkName(chainId)
-        console.log('🌐 Chain ID:', chainId, 'Network:', networkName)
+        
+        console.log('=== NETWORK DETECTION DEBUG ===')
+        console.log('🌐 Current Chain ID:', chainId)
+        console.log('🌐 Current Network Name:', networkName)
+        console.log('🎯 Expected Chain ID:', BASE_SEPOLIA_CONFIG.chainId)
+        console.log('🎯 Expected Network:', 'Base Sepolia')
+        console.log('✅ Is Correct Network:', chainId.toUpperCase() === BASE_SEPOLIA_CONFIG.chainId.toUpperCase())
+        console.log('📱 Is in SuperApp:', isInCoinbaseApp)
+        console.log('================================')
         
         setWallet({
           isConnected: true,
