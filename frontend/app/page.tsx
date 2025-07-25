@@ -20,7 +20,7 @@ export default function HomePage() {
           <div className="lg:col-span-1">
             <div className="sticky top-20">
               <div className="bg-white rounded-lg p-4 shadow-sm border">
-                <h3 className="font-semibold text-gray-900 mb-3">Sobre o Conectados Impact</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">Sobre o DoeAgora</h3>
                 <div className="space-y-4">
                   <div className="text-sm text-gray-600">
                     <p className="mb-2">
@@ -62,7 +62,7 @@ export default function HomePage() {
       {/* Version Footer */}
       <footer className="bg-white border-t border-gray-200 py-2 px-4">
         <div className="container mx-auto flex justify-between items-center text-xs text-gray-500">
-          <span>Conectados MiniApp</span>
+          <span>DoeAgora MiniApp</span>
           <span id="version-info">v1.0.3 - Build 2025-01-22-07:20</span>
         </div>
       </footer>

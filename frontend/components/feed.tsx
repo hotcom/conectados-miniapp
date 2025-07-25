@@ -245,7 +245,7 @@ export function Feed() {
             <div className="text-gray-400 mb-4">
               <Users className="w-16 h-16 mx-auto" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Bem-vindo ao Conectados Impact!</h3>
+            <h3 className="text-lg font-semibold mb-2">Bem-vindo ao DoeAgora!</h3>
             <p className="text-gray-600 mb-4">
               Este é o feed de causas sociais. Quando ONGs criarem perfis e postarem sobre suas causas, elas aparecerão aqui.
             </p>

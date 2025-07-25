@@ -1,5 +1,5 @@
 /**
- * Local Storage Service for Conectados Impact MVP
+ * Local Storage Service for DoeAgora MVP
  * Handles persistence of profiles, campaigns, and posts
  */
 

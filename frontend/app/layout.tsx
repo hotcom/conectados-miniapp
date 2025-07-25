@@ -10,7 +10,7 @@ import { MiniAppProvider } from "@/components/miniapp-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Conectados - Doações Descentralizadas",
+  title: "DoeAgora - Doações Descentralizadas",
   description: "Plataforma descentralizada para ONGs criarem perfis, campanhas e receberem doações em cBRL na Base",
   generator: 'v0.dev',
   manifest: '/miniapp-manifest.json',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Conectados'
+    title: 'DoeAgora'
   }
 }
 
@@ -34,7 +34,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Conectados" />
+        <meta name="apple-mobile-web-app-title" content="DoeAgora" />
         <link rel="manifest" href="/miniapp-manifest.json" />
         <link rel="icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/icon-192.png" />

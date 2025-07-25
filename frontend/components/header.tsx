@@ -62,7 +62,7 @@ export function Header() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="text-2xl font-bold text-green-600">
-            Conectados Impact
+            DoeAgora
           </Link>
 
           <div className="hidden md:block flex-1 max-w-xs mx-8">
