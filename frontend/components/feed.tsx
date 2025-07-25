@@ -122,26 +122,26 @@ export function Feed() {
     const loadData = async () => {
       console.log('🔄 Loading feed data...')
       
-      // Try to load campaigns from blockchain first
+      // ALWAYS load Firebase data first (for immediate display)
+      console.log('📱 Loading from Firebase...')
+      const storedPosts = await firebaseStorage.getPosts()
+      const storedCampaigns = await firebaseStorage.getCampaigns()
+      const storedOrganizations = await firebaseStorage.getOrganizations()
+      
+      console.log('📊 Loaded from Firebase:', {
+        posts: storedPosts.length,
+        campaigns: storedCampaigns.length,
+        organizations: storedOrganizations.length
+      })
+      
+      setPosts(storedPosts)
+      setCampaigns(storedCampaigns)
+      setOrganizations(storedOrganizations)
+      
+      // THEN try to load and merge blockchain data if wallet is connected
       if (isWalletConnected()) {
-        console.log('💰 Wallet detected, loading from blockchain...')
+        console.log('💰 Wallet detected, loading additional blockchain data...')
         await loadBlockchainCampaigns()
-      } else {
-        console.log('📱 No wallet, loading from Firebase...')
-        // Fallback to Firebase when no wallet
-        const storedPosts = await firebaseStorage.getPosts()
-        const storedCampaigns = await firebaseStorage.getCampaigns()
-        const storedOrganizations = await firebaseStorage.getOrganizations()
-        
-        console.log('📊 Loaded from Firebase:', {
-          posts: storedPosts.length,
-          campaigns: storedCampaigns.length,
-          organizations: storedOrganizations.length
-        })
-        
-        setPosts(storedPosts)
-        setCampaigns(storedCampaigns)
-        setOrganizations(storedOrganizations)
       }
     }
     
