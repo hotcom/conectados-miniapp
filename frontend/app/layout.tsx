@@ -4,8 +4,9 @@ import { Inter } from "next/font/google"
 import { WalletProvider } from "@/contexts/wallet-context"
 import "./globals.css"
 import "../styles/miniapp.css"
+import "../styles/minikit.css"
 import { NetworkStatus } from "@/components/network-status"
-import { MiniAppProvider } from "@/components/miniapp-provider"
+import { MiniKitProvider } from "@/components/minikit-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -40,11 +41,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className={inter.className}>
-        <MiniAppProvider>
+        <MiniKitProvider>
           <WalletProvider>
             {children}
           </WalletProvider>
-        </MiniAppProvider>
+        </MiniKitProvider>
       </body>
     </html>
   )
