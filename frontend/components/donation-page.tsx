@@ -14,6 +14,7 @@ import { QrCode, Copy, CheckCircle, Heart, Users, Target, Wallet, Loader2, Exter
 import { useWalletContext } from "@/contexts/wallet-context"
 import { Campaign, CampaignFactory, ensureBaseSepoliaNetwork, formatBRL, CBRL_TOKEN_ADDRESS } from "@/lib/campaign-factory"
 import { ethers } from "ethers"
+import { useMiniKit } from '@coinbase/onchainkit/minikit'
 
 interface DonationPageProps {
   postId: string
