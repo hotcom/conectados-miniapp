@@ -82,30 +82,65 @@ export function Feed() {
       for (const campaign of campaigns) {
         console.log('🔍 Processando campanha:', campaign.id, 'Contrato:', campaign.contractAddress)
         
-        if (campaign.contractAddress) {
+        if (campaign.contractAddress && campaign.onChain?.campaignId) {
           try {
-            const campaignContract = new Campaign(provider, campaign.contractAddress)
-            const info = await campaignContract.getCampaignInfo()
-            const progress = await campaignContract.getProgressPercentage()
+            // Use CampaignFactory to get the correct contract address
+            const factoryContract = new ethers.Contract(
+              '0x28e4aDa7E2760F07517D9237c0419F2f025f91Da', // CampaignFactory address
+              [
+                'function getCampaignContract(uint256 campaignId) view returns (address)',
+                'function getCampaignInfo(uint256 campaignId) view returns (tuple(string title, string description, address creator, address beneficiary, uint256 goal, uint256 raised, bool isActive, uint256 deadline))'
+              ],
+              provider
+            )
+            
+            // Get the actual campaign contract address from factory
+            const actualContractAddress = await factoryContract.getCampaignContract(campaign.onChain.campaignId)
+            console.log('📍 Endereço real do contrato:', actualContractAddress)
+            
+            // Get campaign info from factory
+            const info = await factoryContract.getCampaignInfo(campaign.onChain.campaignId)
+            
+            const progress = info.goal > 0 ? (info.raised / info.goal) * 100 : 0
             
             console.log('📊 Dados da campanha', campaign.id, ':', { 
-              goal: info.goal, 
-              raised: info.raised, 
+              goal: ethers.utils.formatEther(info.goal), 
+              raised: ethers.utils.formatEther(info.raised), 
               progress,
-              donorCount: info.donorCount
+              isActive: info.isActive
             })
             
             onChainInfo[campaign.id] = {
-              ...info,
+              goal: parseFloat(ethers.utils.formatEther(info.goal)),
+              raised: parseFloat(ethers.utils.formatEther(info.raised)),
               progressPercentage: progress,
-              contractAddress: campaign.contractAddress,
-              donorCount: info.donorCount || 0
+              contractAddress: actualContractAddress,
+              donorCount: 0, // We'll implement this later
+              isActive: info.isActive
             }
           } catch (error) {
             console.error(`❌ Erro ao carregar dados da campanha ${campaign.id}:`, error)
+            console.log('🔍 Tentando método alternativo...')
+            
+            // Fallback: try to connect directly to the contract
+            try {
+              const campaignContract = new Campaign(provider, campaign.contractAddress)
+              const info = await campaignContract.getCampaignInfo()
+              const progress = await campaignContract.getProgressPercentage()
+              
+              onChainInfo[campaign.id] = {
+                ...info,
+                progressPercentage: progress,
+                contractAddress: campaign.contractAddress,
+                donorCount: info.donorCount || 0
+              }
+              console.log('✅ Método alternativo funcionou para:', campaign.id)
+            } catch (fallbackError) {
+              console.error(`❌ Método alternativo também falhou para ${campaign.id}:`, fallbackError)
+            }
           }
         } else {
-          console.log('⚠️ Campanha sem contrato:', campaign.id)
+          console.log('⚠️ Campanha sem contrato ou campaignId:', campaign.id)
         }
       }
       
