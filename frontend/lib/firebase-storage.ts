@@ -1,6 +1,7 @@
 /**
  * Firebase Storage Service for DoeAgora MVP
  * Handles persistence of profiles, campaigns, and posts in Firestore
+ * Now includes Firebase Storage for images (replaces IPFS/Pinata)
  */
 
 import { 
@@ -20,6 +21,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { firebaseImageUpload } from './firebase-image-upload';
 
 // Interfaces (same as before but with Firebase timestamps)
 export interface Organization {
@@ -27,7 +29,7 @@ export interface Organization {
   name: string
   username: string
   description: string
-  avatar?: string // IPFS URL
+  avatar?: string // Firebase Storage URL
   walletAddress: string
   website?: string
   location?: string
@@ -41,7 +43,7 @@ export interface Campaign {
   organizationId: string
   title: string
   description: string
-  image?: string // IPFS URL
+  image?: string // Firebase Storage URL
   goal: number
   raised: number
   donors: number
@@ -62,7 +64,7 @@ export interface Post {
   organizationId: string
   campaignId?: string
   content: string
-  image?: string // IPFS URL
+  image?: string // Firebase Storage URL
   createdAt: Timestamp | number
   likes: number
   shares: number
@@ -306,7 +308,7 @@ class FirebaseStorageService {
       name: 'ONG Esperança',
       username: 'ongesperanca',
       description: 'Trabalhamos para levar esperança e oportunidades para comunidades carentes.',
-      avatar: undefined, // Will be set via IPFS later
+      avatar: undefined, // Will be set via Firebase Storage later
       walletAddress: '0x1234567890123456789012345678901234567890',
       website: 'https://ongesperanca.org',
       location: 'São Paulo, SP',

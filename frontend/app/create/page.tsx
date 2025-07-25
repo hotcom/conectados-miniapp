@@ -13,7 +13,7 @@ import { Upload, ImageIcon, Wallet, AlertCircle, Loader2 } from "lucide-react"
 import { useWalletContext } from "@/contexts/wallet-context"
 import { CampaignFactory, ensureBaseSepoliaNetwork, formatBRL } from "@/lib/campaign-factory"
 import { firebaseStorage, type Campaign, type Post } from "@/lib/firebase-storage"
-import { uploadImageToIPFS } from "@/lib/ipfs-upload"
+import { firebaseImageUpload } from "@/lib/firebase-image-upload"
 import { ethers } from "ethers"
 
 export default function CreatePage() {
@@ -44,15 +44,17 @@ export default function CreatePage() {
     setDeploymentStatus("Preparando dados...")
 
     try {
-      // Upload image to IPFS if provided
+      // Upload image to Firebase Storage if provided
       let imageUrl: string | undefined = undefined
       if (image) {
-        setDeploymentStatus("Enviando imagem para IPFS...")
+        setDeploymentStatus("Enviando imagem para Firebase Storage...")
         try {
-          imageUrl = await uploadImageToIPFS(image, `campaign-${Date.now()}`)
-          console.log('✅ Campaign image uploaded to IPFS:', imageUrl)
+          // Generate unique campaign ID for filename
+          const campaignId = `campaign_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+          imageUrl = await firebaseImageUpload.uploadCampaignImage(image, campaignId)
+          console.log('✅ Campaign image uploaded to Firebase Storage:', imageUrl)
         } catch (error) {
-          console.error('❌ Image upload failed, using base64:', error)
+          console.error('❌ Firebase Storage upload failed, using base64:', error)
           // Fallback to base64
           imageUrl = await new Promise<string>((resolve) => {
             const reader = new FileReader()
@@ -64,7 +66,7 @@ export default function CreatePage() {
 
       // Get provider and ensure Base Sepolia network
       setDeploymentStatus("Conectando à Base Sepolia...")
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const provider = new ethers.providers.Web3Provider(window.ethereum as any)
       await ensureBaseSepoliaNetwork(provider)
 
       // Create campaign on-chain

@@ -7,7 +7,7 @@ import { Heart, Users, MessageCircle, RefreshCw, Database } from "lucide-react"
 import { firebaseStorage, type Post, type Organization } from "@/lib/firebase-storage"
 import { useWalletContext } from "@/contexts/wallet-context"
 import { Campaign } from "@/lib/campaign-factory"
-import { loadCampaignsFromBlockchain, createPostsFromCampaigns, isWalletConnected } from "@/lib/blockchain-campaigns"
+import { loadCampaignsFromBlockchain, createPostsFromCampaigns, isWalletConnected, loadCampaignOnChainData } from "@/lib/blockchain-campaigns"
 import { ethers } from "ethers"
 
 export function Feed() {
@@ -20,55 +20,47 @@ export function Feed() {
   const walletHook = useWalletContext()
   const isConnected = walletHook.isConnected
 
-  // Load campaigns from blockchain (solves localStorage isolation)
+  // Load campaigns from Firebase and blockchain
   const loadCampaigns = async () => {
     try {
-      console.log('🔄 MODO DEBUG: Carregando campanha de teste...')
+      console.log('🔄 DoeAgora: Carregando campanhas do Firebase...')
       setIsLoadingBlockchain(true)
       
-      // TEMPORARY: Use mock data to test on-chain functionality
-      const mockCampaigns = [{
-        id: 'campaign_test_10',
-        title: 'Campanha de Teste On-Chain',
-        description: 'Testando conexão on-chain com CampaignFactory',
-        goal: 1000,
-        raised: 0,
-        creator: '0x300Da20E86B20A7A53e199c9e3fb2fD57D55Ceec',
-        contractAddress: '0xc78A1b20909841aDd79fF6d4296bE82d7d5C4349',
-        campaignId: 10,
-        onChain: {
-          campaignId: 10,
-          transactionHash: '0x0b7b0e32964ee6b6baa437c2d79cdc5702c2b76378d6ad831d65df017d8793e5'
-        },
-        createdAt: new Date().toISOString(),
-        image: '/api/placeholder/400/300'
-      }]
+      // Load Firebase campaigns first
+      const firebaseCampaigns = await firebaseStorage.getCampaigns()
+      console.log('📊 Firebase campaigns loaded:', firebaseCampaigns.length)
       
-      console.log('🆘 MOCK: Usando dados de teste para campanha 10')
-      setCampaigns(mockCampaigns)
+      // Set Firebase campaigns immediately
+      setCampaigns(firebaseCampaigns)
       
-      // Try to load Firebase data (but don't fail if it errors)
-      try {
-        console.log('🔄 Tentando carregar Firebase...')
-        const firebaseCampaigns = await firebaseStorage.getCampaigns()
-        console.log('📊 Firebase campaigns loaded:', firebaseCampaigns.length)
-        
-        if (firebaseCampaigns.length > 0) {
-          setCampaigns([...mockCampaigns, ...firebaseCampaigns])
-        }
-      } catch (firebaseError) {
-        console.warn('⚠️ Firebase falhou, usando apenas dados mock:', firebaseError)
-      }
-      
-      // If wallet is connected, also load blockchain data
+      // If wallet is connected, also load blockchain data to enrich campaigns
       if (walletHook.isConnected && walletHook.address) {
-        console.log('🔗 Carteira conectada, carregando dados da blockchain...')
-        const blockchainCampaigns = await loadCampaignsFromBlockchain()
-        console.log('📊 Blockchain campaigns loaded:', blockchainCampaigns.length)
+        console.log('🔗 Carteira conectada, enriquecendo com dados da blockchain...')
         
-        // Merge mock, Firebase and blockchain data
-        const allCampaigns = [...mockCampaigns, ...blockchainCampaigns]
-        setCampaigns(allCampaigns)
+        // For each Firebase campaign that has contractAddress, get on-chain data
+        const enrichedCampaigns = await Promise.all(
+          firebaseCampaigns.map(async (campaign) => {
+            if (campaign.contractAddress) {
+              try {
+                // Get on-chain data for this campaign
+                const onChainData = await loadCampaignOnChainData(campaign.contractAddress)
+                return {
+                  ...campaign,
+                  raised: onChainData?.raised || campaign.raised,
+                  donors: onChainData?.donors || campaign.donors,
+                  onChain: onChainData
+                }
+              } catch (error) {
+                console.warn(`⚠️ Erro ao carregar dados on-chain para campanha ${campaign.id}:`, error)
+                return campaign
+              }
+            }
+            return campaign
+          })
+        )
+        
+        setCampaigns(enrichedCampaigns)
+        console.log('✅ Campanhas enriquecidas com dados on-chain')
       }
       
     } catch (error) {

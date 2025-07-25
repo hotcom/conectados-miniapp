@@ -101,5 +101,68 @@ export function createPostsFromCampaigns(campaigns: any[]): any[] {
  * Check if user is connected to wallet
  */
 export function isWalletConnected(): boolean {
-  return !!(window as any).ethereum && !!(window as any).ethereum.selectedAddress
+  if (typeof window === 'undefined') return false
+  return !!(window.ethereum && (window.ethereum as any).selectedAddress)
+}
+
+/**
+ * Load on-chain data for a specific campaign contract
+ * @param contractAddress - Address of the individual campaign contract
+ * @returns Promise<any> - On-chain campaign data
+ */
+export async function loadCampaignOnChainData(contractAddress: string): Promise<any> {
+  try {
+    console.log(`🔍 Loading on-chain data for contract: ${contractAddress}`)
+    
+    // Check if wallet is connected
+    if (!window.ethereum) {
+      console.log('❌ No wallet detected')
+      return null
+    }
+    
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    
+    // Individual campaign contract ABI (simplified)
+    const campaignABI = [
+      'function getGoal() view returns (uint256)',
+      'function getTotalRaised() view returns (uint256)',
+      'function getDonorCount() view returns (uint256)',
+      'function getTitle() view returns (string)',
+      'function getDescription() view returns (string)',
+      'function getBeneficiary() view returns (address)',
+      'function getCreator() view returns (address)'
+    ]
+    
+    const contract = new ethers.Contract(contractAddress, campaignABI, provider)
+    
+    // Get campaign data from contract
+    const [goal, raised, donorCount, title, description, beneficiary, creator] = await Promise.all([
+      contract.getGoal().catch(() => ethers.BigNumber.from(0)),
+      contract.getTotalRaised().catch(() => ethers.BigNumber.from(0)),
+      contract.getDonorCount().catch(() => ethers.BigNumber.from(0)),
+      contract.getTitle().catch(() => 'Campanha On-Chain'),
+      contract.getDescription().catch(() => 'Descrição não disponível'),
+      contract.getBeneficiary().catch(() => '0x0000000000000000000000000000000000000000'),
+      contract.getCreator().catch(() => '0x0000000000000000000000000000000000000000')
+    ])
+    
+    const onChainData = {
+      contractAddress,
+      goal: parseFloat(ethers.utils.formatEther(goal)),
+      raised: parseFloat(ethers.utils.formatEther(raised)),
+      donors: donorCount.toNumber(),
+      title,
+      description,
+      beneficiary,
+      creator,
+      progress: goal.gt(0) ? (raised.mul(100).div(goal)).toNumber() : 0
+    }
+    
+    console.log(`✅ On-chain data loaded for ${contractAddress}:`, onChainData)
+    return onChainData
+    
+  } catch (error) {
+    console.error(`❌ Error loading on-chain data for ${contractAddress}:`, error)
+    return null
+  }
 }

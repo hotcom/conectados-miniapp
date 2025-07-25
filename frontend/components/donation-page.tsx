@@ -31,17 +31,17 @@ export function DonationPage({ postId }: DonationPageProps) {
   
   const { isConnected, address, connect } = useWalletContext()
 
-  // Load campaign data from localStorage and on-chain
+  // Load campaign data from Firebase and on-chain
   useEffect(() => {
     const loadCampaignData = async () => {
       try {
-        // Load from localStorage
-        const { storage } = await import('@/lib/storage')
-        const campaigns = storage.getCampaigns()
-        const posts = storage.getPosts()
-        const organizations = storage.getOrganizations()
+        // Load from Firebase
+        const { firebaseStorage } = await import('@/lib/firebase-storage')
+        const campaigns = await firebaseStorage.getCampaigns()
+        const posts = await firebaseStorage.getPosts()
+        const organizations = await firebaseStorage.getOrganizations()
         
-        console.log('🔍 Searching for campaign with postId:', postId)
+        console.log('🔍 DoeAgora: Searching for campaign with postId:', postId)
         console.log('📋 Available campaigns:', campaigns.map(c => ({ id: c.id, title: c.title })))
         console.log('📝 Available posts:', posts.map(p => ({ id: p.id, campaignId: p.campaignId })))
         
@@ -60,7 +60,7 @@ export function DonationPage({ postId }: DonationPageProps) {
           campaign = campaigns.find(c => c.id === postId)
           if (campaign) {
             // If we found campaign directly, try to find associated post
-            post = posts.find(p => p.campaignId === campaign?.id)
+            post = posts.find(p => p.campaignId === campaign.id)
           }
         }
         
