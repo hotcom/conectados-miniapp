@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   const version = {
-    version: "1.0.3",
-    build: "2025-01-22-07:20",
+    version: "1.0.4",
+    build: "2025-01-25-16:53",
     commit: "a9e7756",
     features: [
       "✅ Feed unificado blockchain",

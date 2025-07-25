@@ -63,7 +63,7 @@ export default function HomePage() {
       <footer className="bg-white border-t border-gray-200 py-2 px-4">
         <div className="container mx-auto flex justify-between items-center text-xs text-gray-500">
           <span>DoeAgora MiniApp</span>
-          <span id="version-info">v1.0.3 - Build 2025-01-22-07:20</span>
+          <span id="version-info">v1.0.4 - Build 2025-01-25-16:53</span>
         </div>
       </footer>
     </div>
