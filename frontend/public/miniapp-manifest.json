@@ -1,16 +1,13 @@
 {
-  "accountAssociation": {
-    "header": "eyJmaWQiOjM2MzIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhEMzNhZjkxMjM0NTY3ODkwYWJjZGVmMTIzNDU2Nzg5MGFiY2RlZjEyIn0",
-    "payload": "eyJkb21haW4iOiJjb25lY3RhZG9zLW1pbmlhcHAtZ2l0LW1haW4taG90Y29tcy1wcm9qZWN0cy52ZXJjZWwuYXBwIn0",
-    "signature": "MHg4YWJjZGVmMTIzNDU2Nzg5MGFiY2RlZjEyMzQ1Njc4OTBhYmNkZWYxMjM0NTY3ODkwYWJjZGVmMTIzNDU2Nzg5MGFiY2RlZjEyMzQ1Njc4OTBhYmNkZWYxMjM0NTY3ODkwYWJjZGVmMTIzNDU2Nzg5MGFiY2RlZjEyMzQ1Njc4OTBhYmNkZWYxYjAx"
-  },
-  "frame": {
-    "version": "1",
-    "name": "DoeAgora",
-    "iconUrl": "https://doeagora-eight.vercel.app/icon-192x192.png",
-    "splashImageUrl": "https://doeagora-eight.vercel.app/splash.png",
-    "splashBackgroundColor": "#0052FF",
-    "homeUrl": "https://doeagora-eight.vercel.app",
-    "webhookUrl": "https://doeagora-eight.vercel.app/api/webhook"
+  "name": "DoeAgora",
+  "description": "O impacto começa com você. Doações on-chain com transparência.",
+  "url": "https://doeagora-eight.vercel.app",
+  "icon": "https://doeagora-eight.vercel.app/icon-192x192.png",
+  "category": "social-good",
+  "chains": ["base-sepolia"],
+  "developer": {
+    "name": "Jownes Dev",
+    "website": "https://doeagora-eight.vercel.app",
+    "contact": "rafael@seudominio.com"
   }
 }
