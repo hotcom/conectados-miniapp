@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Upload, ImageIcon, Wallet, AlertCircle, Loader2 } from "lucide-react"
 import { useWalletContext } from "@/contexts/wallet-context"
 import { CampaignFactory, ensureBaseSepoliaNetwork, formatBRL } from "@/lib/campaign-factory"
+import { firebaseStorage, type Campaign, type Post } from "@/lib/firebase-storage"
+import { uploadImageToIPFS } from "@/lib/ipfs-upload"
 import { ethers } from "ethers"
 
 export default function CreatePage() {
@@ -42,15 +44,22 @@ export default function CreatePage() {
     setDeploymentStatus("Preparando dados...")
 
     try {
-      // Process image if uploaded
-      let imageData: string | undefined = undefined
+      // Upload image to IPFS if provided
+      let imageUrl: string | undefined = undefined
       if (image) {
-        setDeploymentStatus("Processando imagem...")
-        imageData = await new Promise<string>((resolve) => {
-          const reader = new FileReader()
-          reader.onload = (e) => resolve(e.target?.result as string)
-          reader.readAsDataURL(image)
-        })
+        setDeploymentStatus("Enviando imagem para IPFS...")
+        try {
+          imageUrl = await uploadImageToIPFS(image, `campaign-${Date.now()}`)
+          console.log('✅ Campaign image uploaded to IPFS:', imageUrl)
+        } catch (error) {
+          console.error('❌ Image upload failed, using base64:', error)
+          // Fallback to base64
+          imageUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader()
+            reader.onload = (e) => resolve(e.target?.result as string)
+            reader.readAsDataURL(image)
+          })
+        }
       }
 
       // Get provider and ensure Base Sepolia network
@@ -70,11 +79,11 @@ export default function CreatePage() {
       )
 
       console.log("Campaign created on-chain:", onChainResult)
-      setDeploymentStatus("Salvando dados localmente...")
+      setDeploymentStatus("Salvando dados no Firebase...")
 
-      // Create campaign data for local storage (now with on-chain info)
-      const campaignData = {
-        id: `campaign_${Date.now()}`,
+      // Create campaign data for Firebase (now with on-chain info)
+      const campaignData: Campaign = {
+        id: firebaseStorage.generateId(),
         organizationId: address!,
         title,
         description,
@@ -82,7 +91,7 @@ export default function CreatePage() {
         raised: 0,
         donors: 0,
         daysLeft: 30,
-        image: imageData,
+        image: imageUrl,
         walletAddress: address!,
         createdAt: Date.now(),
         status: 'active' as const,
@@ -98,22 +107,21 @@ export default function CreatePage() {
 
       console.log("Saving campaign data:", campaignData)
 
-      // Save to localStorage
-      const { storage } = await import('@/lib/storage')
-      storage.saveCampaign(campaignData)
+      // Save to Firebase
+      await firebaseStorage.saveCampaign(campaignData)
 
       // Create a post for the campaign
-      const postData = {
-        id: `post_${Date.now()}`,
+      const postData: Post = {
+        id: firebaseStorage.generateId(),
         organizationId: address!,
         campaignId: campaignData.id,
         content: `🚀 Nova campanha criada: ${title}\n\n${description}\n\n💰 Meta: ${formatBRL(goal)}\n🔗 Contrato: ${onChainResult.campaignContract}`,
-        image: imageData,
+        image: imageUrl,
         createdAt: Date.now(),
         likes: 0,
         shares: 0
       }
-      storage.savePost(postData)
+      await firebaseStorage.savePost(postData)
 
       setDeploymentStatus("Finalizando...")
       await new Promise((resolve) => setTimeout(resolve, 500))
