@@ -1,0 +1,14 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#4A90E2" stroke="#2E5C8A" stroke-width="8"/>
+  
+  <!-- Eyes -->
+  <ellipse cx="180" cy="180" rx="25" ry="40" fill="#2E5C8A"/>
+  <ellipse cx="332" cy="180" rx="25" ry="40" fill="#2E5C8A"/>
+  
+  <!-- Smile -->
+  <path d="M 150 320 Q 256 420 362 320" stroke="#2E5C8A" stroke-width="20" fill="none" stroke-linecap="round"/>
+  
+  <!-- Highlight for depth -->
+  <ellipse cx="200" cy="150" rx="30" ry="20" fill="#6BA6F0" opacity="0.6"/>
+</svg>
