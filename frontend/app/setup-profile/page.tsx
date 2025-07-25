@@ -13,7 +13,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Upload, Building2, Wallet, Globe, MapPin, Calendar, AlertCircle, CheckCircle } from "lucide-react"
 import { useWalletContext } from "@/contexts/wallet-context"
-import { storage, type Organization } from "@/lib/storage"
+import { firebaseStorage, type Organization } from "@/lib/firebase-storage"
+import { uploadImageToIPFS } from "@/lib/ipfs-upload"
 
 export default function SetupProfilePage() {
   const router = useRouter()
@@ -34,17 +35,26 @@ export default function SetupProfilePage() {
 
   // Check if user already has a profile
   useEffect(() => {
-    if (isConnected && address) {
-      const existingOrg = storage.getOrganizations().find(org => 
-        org.walletAddress.toLowerCase() === address.toLowerCase()
-      )
-      
-      if (existingOrg) {
-        // User already has a profile, redirect to profile page
-        storage.setCurrentUser(existingOrg.id)
-        router.push('/profile')
+    const checkExistingProfile = async () => {
+      if (isConnected && address) {
+        try {
+          const organizations = await firebaseStorage.getOrganizations()
+          const existingOrg = organizations.find((org: Organization) => 
+            org.walletAddress.toLowerCase() === address.toLowerCase()
+          )
+          
+          if (existingOrg) {
+            // User already has a profile, redirect to profile page
+            firebaseStorage.setCurrentUser(existingOrg.id)
+            router.push('/profile')
+          }
+        } catch (error) {
+          console.error('Error checking existing profile:', error)
+        }
       }
     }
+    
+    checkExistingProfile()
   }, [isConnected, address, router])
 
   const handleInputChange = (field: string, value: string) => {
@@ -88,13 +98,8 @@ export default function SetupProfilePage() {
       }
     }
 
-    // Check if username is already taken
-    const existingOrg = storage.getOrganizations().find(org => 
-      org.username.toLowerCase() === formData.username.toLowerCase()
-    )
-    if (existingOrg) {
-      newErrors.username = "Este nome de usuário já está em uso"
-    }
+    // Check if username is already taken (will be checked async in submit)
+    // For now, we'll do this check during form submission to avoid blocking UI
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -115,12 +120,40 @@ export default function SetupProfilePage() {
     setIsSubmitting(true)
 
     try {
+      // Check if username is already taken
+      const organizations = await firebaseStorage.getOrganizations()
+      const existingOrg = organizations.find((org: Organization) => 
+        org.username.toLowerCase() === formData.username.toLowerCase()
+      )
+      if (existingOrg) {
+        setErrors({ username: "Este nome de usuário já está em uso" })
+        setIsSubmitting(false)
+        return
+      }
+
+      // Upload avatar to IPFS if provided
+      let avatarUrl = undefined
+      if (formData.avatar) {
+        console.log('📸 Uploading avatar to IPFS...')
+        try {
+          // Convert base64 to file and upload to IPFS
+          const response = await fetch(formData.avatar)
+          const blob = await response.blob()
+          const file = new File([blob], `avatar-${Date.now()}.png`, { type: blob.type })
+          avatarUrl = await uploadImageToIPFS(file, `avatar-${formData.username}`)
+          console.log('✅ Avatar uploaded to IPFS:', avatarUrl)
+        } catch (error) {
+          console.error('❌ Avatar upload failed, using base64:', error)
+          avatarUrl = formData.avatar // Fallback to base64
+        }
+      }
+
       const newOrganization: Organization = {
-        id: storage.generateId(),
+        id: firebaseStorage.generateId(),
         name: formData.name.trim(),
         username: formData.username.trim(),
         description: formData.description.trim(),
-        avatar: formData.avatar || undefined,
+        avatar: avatarUrl,
         walletAddress: address,
         website: formData.website.trim() || undefined,
         location: formData.location.trim() || undefined,
@@ -129,11 +162,11 @@ export default function SetupProfilePage() {
         createdAt: Date.now()
       }
 
-      // Save organization to localStorage
-      storage.saveOrganization(newOrganization)
+      // Save organization to Firebase
+      await firebaseStorage.saveOrganization(newOrganization)
       
       // Set as current user
-      storage.setCurrentUser(newOrganization.id)
+      firebaseStorage.setCurrentUser(newOrganization.id)
 
       // Redirect to profile page
       router.push('/profile')
