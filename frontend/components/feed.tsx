@@ -21,38 +21,61 @@ export function Feed() {
   const isConnected = walletHook.isConnected
 
   // Load campaigns from blockchain (solves localStorage isolation)
-  const loadBlockchainCampaigns = async () => {
-    console.log('🔄 Loading campaigns from blockchain...')
-    setIsLoadingBlockchain(true)
-    
+  const loadCampaigns = async () => {
     try {
-      const blockchainCampaigns = await loadCampaignsFromBlockchain()
-      console.log('✅ Loaded campaigns from blockchain:', blockchainCampaigns.length)
+      console.log('🔄 MODO DEBUG: Carregando campanha de teste...')
+      setIsLoadingBlockchain(true)
       
-      setCampaigns(blockchainCampaigns)
+      // TEMPORARY: Use mock data to test on-chain functionality
+      const mockCampaigns = [{
+        id: 'campaign_test_10',
+        title: 'Campanha de Teste On-Chain',
+        description: 'Testando conexão on-chain com CampaignFactory',
+        goal: 1000,
+        raised: 0,
+        creator: '0x300Da20E86B20A7A53e199c9e3fb2fD57D55Ceec',
+        contractAddress: '0xc78A1b20909841aDd79fF6d4296bE82d7d5C4349',
+        campaignId: 10,
+        onChain: {
+          campaignId: 10,
+          transactionHash: '0x0b7b0e32964ee6b6baa437c2d79cdc5702c2b76378d6ad831d65df017d8793e5'
+        },
+        createdAt: new Date().toISOString(),
+        image: '/api/placeholder/400/300'
+      }]
       
-      // Create posts from blockchain campaigns
-      const blockchainPosts = createPostsFromCampaigns(blockchainCampaigns)
+      console.log('🆘 MOCK: Usando dados de teste para campanha 10')
+      setCampaigns(mockCampaigns)
       
-      // Also load Firebase posts (for backward compatibility)
-      const firebasePosts = await firebaseStorage.getPosts()
+      // Try to load Firebase data (but don't fail if it errors)
+      try {
+        console.log('🔄 Tentando carregar Firebase...')
+        const firebaseCampaigns = await firebaseStorage.getCampaigns()
+        console.log('📊 Firebase campaigns loaded:', firebaseCampaigns.length)
+        
+        if (firebaseCampaigns.length > 0) {
+          setCampaigns([...mockCampaigns, ...firebaseCampaigns])
+        }
+      } catch (firebaseError) {
+        console.warn('⚠️ Firebase falhou, usando apenas dados mock:', firebaseError)
+      }
       
-      // Combine and deduplicate posts
-      const allPosts = [...blockchainPosts, ...firebasePosts]
-      const uniquePosts = allPosts.filter((post, index, self) => 
-        index === self.findIndex(p => p.id === post.id)
-      )
-      
-      setPosts(uniquePosts)
-      console.log('📊 Total posts loaded:', uniquePosts.length)
+      // If wallet is connected, also load blockchain data
+      if (walletHook.isConnected && walletHook.address) {
+        console.log('🔗 Carteira conectada, carregando dados da blockchain...')
+        const blockchainCampaigns = await loadCampaignsFromBlockchain()
+        console.log('📊 Blockchain campaigns loaded:', blockchainCampaigns.length)
+        
+        // Merge mock, Firebase and blockchain data
+        const allCampaigns = [...mockCampaigns, ...blockchainCampaigns]
+        setCampaigns(allCampaigns)
+      }
       
     } catch (error) {
-      console.error('❌ Error loading blockchain campaigns:', error)
-      // Fallback to Firebase only
-      const firebasePosts = await firebaseStorage.getPosts()
-      const firebaseCampaigns = await firebaseStorage.getCampaigns()
-      setPosts(firebasePosts)
-      setCampaigns(firebaseCampaigns)
+      console.error('❌ Erro ao carregar campanhas:', error)
+      // Fallback: use empty arrays if everything fails
+      setCampaigns([])
+      setPosts([])
     } finally {
       setIsLoadingBlockchain(false)
     }
@@ -195,7 +218,7 @@ export function Feed() {
       // THEN try to load and merge blockchain data if wallet is connected
       if (isWalletConnected()) {
         console.log('💰 Wallet detected, loading additional blockchain data...')
-        await loadBlockchainCampaigns()
+        await loadCampaigns()
       }
     }
     
