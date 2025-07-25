@@ -82,7 +82,19 @@ export function Feed() {
       for (const campaign of campaigns) {
         console.log('🔍 Processando campanha:', campaign.id, 'Contrato:', campaign.contractAddress)
         
-        if (campaign.contractAddress && campaign.onChain?.campaignId) {
+        // Check for campaignId in different possible locations
+        const campaignId = campaign.onChain?.campaignId || campaign.campaignId
+        
+        console.log('🔍 Debug campanha:', {
+          id: campaign.id,
+          contractAddress: campaign.contractAddress,
+          onChain: campaign.onChain,
+          campaignId: campaignId,
+          hasContractAddress: !!campaign.contractAddress,
+          hasCampaignId: !!campaignId
+        })
+        
+        if (campaign.contractAddress && campaignId) {
           try {
             // Use CampaignFactory to get the correct contract address
             const factoryContract = new ethers.Contract(
@@ -95,11 +107,11 @@ export function Feed() {
             )
             
             // Get the actual campaign contract address from factory
-            const actualContractAddress = await factoryContract.getCampaignContract(campaign.onChain.campaignId)
+            const actualContractAddress = await factoryContract.getCampaignContract(campaignId)
             console.log('📍 Endereço real do contrato:', actualContractAddress)
             
             // Get campaign info from factory
-            const info = await factoryContract.getCampaignInfo(campaign.onChain.campaignId)
+            const info = await factoryContract.getCampaignInfo(campaignId)
             
             const progress = info.goal > 0 ? (info.raised / info.goal) * 100 : 0
             
