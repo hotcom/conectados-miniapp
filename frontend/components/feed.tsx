@@ -83,7 +83,13 @@ export function Feed() {
         console.log('🔍 Processando campanha:', campaign.id, 'Contrato:', campaign.contractAddress)
         
         // Check for campaignId in different possible locations
-        const campaignId = campaign.onChain?.campaignId || campaign.campaignId
+        let campaignId = campaign.onChain?.campaignId || campaign.campaignId
+        
+        // Emergency fallback: if this is the specific campaign with known contract, use campaignId 10
+        if (!campaignId && campaign.contractAddress === '0xc78A1b20909841aDd79fF6d4296bE82d7d5C4349') {
+          campaignId = 10
+          console.log('🆘 EMERGENCY: Using hardcoded campaignId 10 for known contract')
+        }
         
         console.log('🔍 Debug campanha:', {
           id: campaign.id,
@@ -91,7 +97,8 @@ export function Feed() {
           onChain: campaign.onChain,
           campaignId: campaignId,
           hasContractAddress: !!campaign.contractAddress,
-          hasCampaignId: !!campaignId
+          hasCampaignId: !!campaignId,
+          isEmergencyFallback: !campaign.onChain?.campaignId && !campaign.campaignId && campaignId === 10
         })
         
         if (campaign.contractAddress && campaignId) {
