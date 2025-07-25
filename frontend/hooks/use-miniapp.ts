@@ -23,15 +23,42 @@ export function useMiniApp(): MiniAppEnvironment {
     const userAgent = navigator.userAgent
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
     
-    // Detect if running inside Coinbase app
-    const isInCoinbaseApp = userAgent.includes('CoinbaseWallet') || 
-                           userAgent.includes('Coinbase') ||
-                           window.location.hostname.includes('coinbase')
+    // Enhanced detection for Coinbase Super App
+    const isInCoinbaseApp = (
+      // User Agent checks
+      userAgent.includes('CoinbaseWallet') || 
+      userAgent.includes('Coinbase') ||
+      userAgent.includes('CBWallet') ||
+      // URL checks
+      window.location.hostname.includes('coinbase') ||
+      // Window object checks
+      !!(window as any).coinbase ||
+      !!(window as any).CoinbaseWalletSDK ||
+      // Ethereum provider checks
+      (typeof (window as any).ethereum !== 'undefined' && 
+       ((window as any).ethereum.isCoinbaseWallet === true ||
+        (window as any).ethereum.isCoinbase === true)) ||
+      // Referrer checks
+      document.referrer.includes('coinbase') ||
+      // Manual override for testing
+      window.location.search.includes('coinbase=true')
+    )
 
     // Check if it's a MiniApp environment
     const isMiniApp = isInCoinbaseApp || 
                      window.location.search.includes('miniapp=true') ||
                      localStorage.getItem('miniapp_mode') === 'true'
+
+    // Debug logging
+    console.log('🔍 MiniApp Detection Debug:')
+    console.log('- User Agent:', userAgent)
+    console.log('- Hostname:', window.location.hostname)
+    console.log('- Search params:', window.location.search)
+    console.log('- Referrer:', document.referrer)
+    console.log('- window.coinbase:', !!(window as any).coinbase)
+    console.log('- window.ethereum.isCoinbaseWallet:', (window as any).ethereum?.isCoinbaseWallet)
+    console.log('- isInCoinbaseApp:', isInCoinbaseApp)
+    console.log('- isMiniApp:', isMiniApp)
 
     setEnvironment({
       isMiniApp,
