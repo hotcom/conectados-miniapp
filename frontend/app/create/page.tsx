@@ -51,10 +51,18 @@ export default function CreatePage() {
         try {
           // Generate unique campaign ID for filename
           const campaignId = `campaign_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-          imageUrl = await firebaseImageUpload.uploadCampaignImage(image, campaignId)
+          
+          // Add timeout to prevent infinite hanging
+          const uploadPromise = firebaseImageUpload.uploadCampaignImage(image, campaignId)
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Firebase Storage upload timeout after 10 seconds')), 10000)
+          })
+          
+          imageUrl = await Promise.race([uploadPromise, timeoutPromise])
           console.log('✅ Campaign image uploaded to Firebase Storage:', imageUrl)
         } catch (error) {
           console.error('❌ Firebase Storage upload failed, using base64:', error)
+          setDeploymentStatus("Firebase Storage falhou, usando fallback...")
           // Fallback to base64
           imageUrl = await new Promise<string>((resolve) => {
             const reader = new FileReader()
