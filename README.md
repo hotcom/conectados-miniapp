@@ -1,11 +1,26 @@
-# DoeAgora - Doações Descentralizadas
+# 🧡 DoeAgora – Transparência nas Doações com Web3
 
-> **MiniApp para Coinbase Super App** - Plataforma descentralizada para ONGs criarem perfis, campanhas e receberem doações em cBRL na Base Sepolia
+**MiniApp para o SuperApp da Coinbase + Interface Web**
+
+> Plataforma descentralizada onde ONGs criam campanhas e recebem doações em stablecoin cBRL (Base). Cada campanha tem seu próprio contrato inteligente para máxima transparência.
 
 [![Deploy](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://doeagora-eight.vercel.app)
-[![MiniApp](https://img.shields.io/badge/MiniApp-Coinbase%20SuperApp-0052FF?logo=coinbase)](https://doeagora-eight.vercel.app/superapp)
+[![MiniApp](https://img.shields.io/badge/MiniApp-Coinbase-0052FF?logo=coinbase)](https://doeagora-eight.vercel.app/superapp)
 [![Network](https://img.shields.io/badge/Network-Base%20Sepolia-0052FF)](https://base-sepolia.blockscout.com)
 [![Contract](https://img.shields.io/badge/Contract-CampaignFactory-success)](https://base-sepolia.blockscout.com/address/0x28e4aDa7E2760F07517D9237c0419F2f025f91Da)
+
+---
+
+## ✨ Experiência de Uso
+
+### 🌐 Interface Web (PWA)
+- [https://doeagora-eight.vercel.app](https://doeagora-eight.vercel.app)
+
+### 📱 Interface no SuperApp da Coinbase
+- Cole este link dentro do SuperApp:  
+  [https://doeagora-eight.vercel.app/superapp](https://doeagora-eight.vercel.app/superapp)
+
+> 🔒 A versão SuperApp utiliza integração nativa com carteira Coinbase. Tudo pronto para rodar diretamente no modo Discover → MiniApps.
 
 ---
 
@@ -13,91 +28,94 @@
 
 ### 🚀 **TESTE AGORA - LINKS DIRETOS:**
 
-1. **🌐 Interface Web Completa:** https://doeagora-eight.vercel.app
-2. **📱 MiniApp SuperApp:** https://doeagora-eight.vercel.app/superapp
-3. **🔗 Contrato Principal:** https://base-sepolia.blockscout.com/address/0x28e4aDa7E2760F07517D9237c0419F2f025f91Da
-4. **💰 Token cBRL:** https://base-sepolia.blockscout.com/address/0x0f628966ea621e7283e9AB3C7935A626b9607718
+| Funcionalidade | Link Direto | Descrição |
+|----------------|-------------|----------|
+| 🌐 **Interface Web** | [doeagora-eight.vercel.app](https://doeagora-eight.vercel.app) | Versão completa com gestão de campanhas |
+| 📱 **MiniApp SuperApp** | [SuperApp Link](https://doeagora-eight.vercel.app/superapp) | Versão otimizada para Coinbase Wallet |
+| 🔍 **Contrato Principal** | [CampaignFactory](https://base-sepolia.blockscout.com/address/0x28e4aDa7E2760F07517D9237c0419F2f025f91Da) | Factory que cria contratos individuais |
+| 💰 **Token cBRL** | [cBRL Token](https://base-sepolia.blockscout.com/address/0x0f628966ea621e7283e9AB3C7935A626b9607718) | Stablecoin BRL para doações |
+| 🪙 **Mint cBRL** | [Mint Page](https://doeagora-eight.vercel.app/mint) | Página para criar tokens de teste |
 
 ### 🎯 **DIFERENCIAIS INOVADORES:**
 
-- ✅ **MiniApp nativo** para Coinbase Super App
-- ✅ **Contratos individuais** para cada campanha (transparência total)
-- ✅ **Contador de doadores únicos** on-chain
-- ✅ **Interface Instagram-like** mobile-first
-- ✅ **Integração cBRL** (stablecoin BRL na Base)
-- ✅ **Transparência blockchain** com links diretos para explorer
-- ✅ **Sistema multiusuário** com Firebase
-- ✅ **PWA completo** com manifest e service worker
+- ✅ **Contratos individuais por campanha** - Cada campanha tem seu próprio contrato para máxima transparência
+- ✅ **MiniApp nativo Coinbase** - Integração oficial com SuperApp da Coinbase
+- ✅ **Contador de doadores únicos** - Sistema on-chain que conta doadores únicos por endereço
+- ✅ **Interface Instagram-like** - Feed vertical mobile-first otimizado para doações
+- ✅ **Stablecoin cBRL** - Token pareado ao Real Brasileiro na Base
+- ✅ **Transparência total** - Links diretos para explorer blockchain em cada campanha
+- ✅ **Sistema multiusuário** - Firebase para dados sociais + blockchain para transparência
+- ✅ **PWA completo** - Instalável como app nativo com manifest e service worker
 
 ---
 
-## 🚀 **FUNCIONALIDADES IMPLEMENTADAS**
+## ✅ Funcionalidades Atuais
 
-### 🏢 **Para ONGs e Organizações**
-- ✅ **Perfil institucional completo** com avatar e descrição
-- ✅ **Criação de campanhas** com deploy automático de contrato individual
-- ✅ **Upload de imagens** com fallback Firebase Storage
-- ✅ **Posts sociais** para engajamento da comunidade
-- ✅ **Dashboard de gestão** com estatísticas em tempo real
-- ✅ **Transparência total** via blockchain explorer
+### 👥 Para ONGs
+- **Criar perfil institucional** com verificação
+- **Criar campanhas** com contrato próprio on-chain
+- **Upload de imagem** de capa e descrição rica
+- **Transparência total**: endereço do contrato, progresso, doadores
+- **Botão "Ver Contrato"** em cada campanha para auditoria pública
 
-### 💝 **Para Doadores**
-- ✅ **Conexão de carteira** (MetaMask, Coinbase Wallet)
-- ✅ **Doações diretas em cBRL** com uma única assinatura
-- ✅ **Feed Instagram-style** com campanhas e posts
-- ✅ **Progresso em tempo real** das campanhas
-- ✅ **Contador de doadores únicos** on-chain
-- ✅ **Histórico verificável** na blockchain
-- ✅ **Interface mobile-first** otimizada
+### 🙌 Para Doadores
+- **Doações diretas em cBRL** (stablecoin BRL)
+- **Contador de doadores únicos** on-chain por endereço
+- **Progresso da campanha** em tempo real
+- **Histórico de doações** on-chain verificável
+- **Feed Instagram-like** mobile-first para descobrir campanhas
 
-### 📱 **MiniApp Coinbase Super App**
-### 📱 MiniApp Coinbase
-- ✅ **Integração nativa** com Coinbase Super App
-- ✅ **Wallet connection** automática
-- ✅ **Mobile-optimized** com safe areas
-- ✅ **PWA features** completas
+### ⚙️ Infraestrutura
+- **Criação automática de contrato** para cada campanha
+- **Conexão com carteira** no MiniApp (Coinbase Wallet nativo)
+- **Safe-area e mobile-first** - otimizado para SuperApp
+- **Deploy na rede Base Sepolia** (testnet) com contratos verificados
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 14 + React + TypeScript + Tailwind CSS
-- **Backend**: Express.js + Node.js
+- **Frontend**: Next.js + React + TypeScript + Tailwind CSS
+- **Backend**: Express.js + Webhooks PIX (OpenPix)
 - **Blockchain**: Solidity + Hardhat + ethers.js
-- **Network**: Base Sepolia Testnet
-- **Token**: cBRL (Brazilian Real Stablecoin)
+- **Network**: Base Sepolia (84532)
+- **Token**: `cBRL` – stablecoin fictícia pareada ao real
 - **MiniApp**: Coinbase MiniKit + PWA
 
-## 🌐 Links Importantes
+---
 
-- **🔗 App Web**: [https://conectados-miniapp.vercel.app](https://conectados-miniapp.vercel.app)
-- **📱 MiniApp**: [Abrir no Coinbase Super App](https://wallet.coinbase.com/miniapp/conectados)
-- **🔍 Contratos**: [Base Sepolia Explorer](https://sepolia.basescan.org/address/0x28e4aDa7E2760F07517D9237c0419F2f025f91Da)
-- **💰 Mint cBRL**: [/mint](https://conectados-miniapp.vercel.app/mint)
+## 🔗 Links Úteis
 
-## 📋 Smart Contracts
+| Item | Link |
+|------|------|
+| 🌐 App Web | [doeagora-eight.vercel.app](https://doeagora-eight.vercel.app) |
+| 📱 MiniApp | [Abrir via Coinbase Wallet](https://doeagora-eight.vercel.app/superapp) |
+| 🔍 Contratos | [BaseScan – CampaignFactory](https://base-sepolia.blockscout.com/address/0x28e4aDa7E2760F07517D9237c0419F2f025f91Da) |
+| 💰 Mint cBRL | [Mint Page](https://doeagora-eight.vercel.app/mint) |
+
+---
+
+## 🧾 Contratos Inteligentes
 
 | Contrato | Endereço | Função |
 |----------|----------|--------|
-| **CampaignFactory** | `0x28e4aDa7E2760F07517D9237c0419F2f025f91Da` | Deploy de campanhas |
-| **cBRL Token** | `0x0f628966ea621e7283e9AB3C7935A626b9607718` | Stablecoin BRL |
-| **Network** | Base Sepolia (84532) | Testnet |
+| `CampaignFactory` | `0x28e4aDa7E2760F07517D9237c0419F2f025f91Da` | Deploy de campanhas |
+| `cBRL Token` | `0x0f628966ea621e7283e9AB3C7935A626b9607718` | Stablecoin BRL |
 
-## 🚀 Como Usar
+---
 
-### 📱 **No Coinbase Super App (Recomendado)**
-1. Abra o Coinbase Super App
-2. Vá em "Discover" → "MiniApps"
-3. Procure por "Conectados" ou use o link direto
-4. Sua carteira já estará conectada automaticamente!
+## 🚧 Roadmap (Próximas Funcionalidades)
 
-### 🌐 **Na Web**
-1. Acesse [conectados-miniapp.vercel.app](https://conectados-miniapp.vercel.app)
-2. Conecte sua MetaMask ou Coinbase Wallet
-3. Troque para Base Sepolia network
-4. Crie seu perfil e comece a usar!
+- [ ] **Cartão de débito com registro on-chain** de cada gasto por campanha
+- [ ] **Importação de XML da SEFAZ** para comprovação de uso de verba por campanha
+- [ ] **NFTs de utilidade** para doadores (ex: cupom de desconto, acesso VIP)
+- [ ] **Contrato ERC-721 específico por campanha**
+- [ ] **Parcerias com marcas** para disponibilizar utilidades nos NFTs
+- [ ] **Sistema de reputação para ONGs**
+- [ ] **Governança via DAO** para curadoria de campanhas e validação de ONGs
 
-## 🧪 Para Desenvolvedores
+---
 
-### Instalação Local
+## 🧪 Como Rodar Localmente
+
 ```bash
 # Clone o repositório
 git clone https://github.com/seu-usuario/conectados-miniapp.git
@@ -114,51 +132,44 @@ npm install
 npm run dev  # Porta 3001
 ```
 
-### Variáveis de Ambiente
-```bash
-# Backend (.env)
-PORT=3001
-BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
-CHAIN_ID=84532
-PRIVATE_KEY=sua_private_key
-CBRL_CONTRACT_ADDRESS=0x0f628966ea621e7283e9AB3C7935A626b9607718
+### 🔧 Configuração da Carteira
+```
+Network: Base Sepolia
+RPC URL: https://sepolia.base.org
+Chain ID: 84532
+Currency: ETH
 ```
 
-### Deploy
-```bash
-# Deploy automático no Vercel
-vercel --prod
+---
 
-# Ou conecte seu repo GitHub ao Vercel
-```
+## 🎯 Status do Projeto
 
-## 🎯 Roadmap
+- [x] ✅ **MVP Completo** - Perfis, campanhas, doações funcionando
+- [x] ✅ **Smart Contracts** - Factory + contratos individuais deployados
+- [x] ✅ **MiniApp Coinbase** - Integração completa com SuperApp
+- [x] ✅ **Contador de Doadores** - Sistema on-chain de doadores únicos
+- [x] ✅ **Interface Instagram-like** - Feed mobile-first otimizado
+- [x] ✅ **Transparência Total** - Links diretos para blockchain explorer
+- [x] ✅ **PWA Completo** - Instalável como app nativo
 
-- [x] ✅ **MVP Completo** - Perfis, campanhas, doações
-- [x] ✅ **Smart Contracts** - Factory + contratos individuais
-- [x] ✅ **MiniApp Coinbase** - Integração completa
-- [x] ✅ **Contador de Doadores** - Doadores únicos
-- [ ] 🔄 **Integração PIX** - OpenPix + mint automático
-- [ ] 🔄 **Farcaster Frames** - Compartilhamento social
-- [ ] 🔄 **Base Mainnet** - Deploy produção
-- [ ] 🔄 **IPFS Storage** - Armazenamento descentralizado
+---
 
-## 🤝 Contribuindo
+## 📞 Contato e Suporte
 
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
+- **Deploy:** https://doeagora-eight.vercel.app
+- **MiniApp:** https://doeagora-eight.vercel.app/superapp
+- **Contratos:** Base Sepolia Blockscout
+- **Repositório:** GitHub (este repositório)
+
+---
 
 ## 📄 Licença
 
-MIT License - veja [LICENSE](LICENSE) para detalhes.
+MIT License - Projeto desenvolvido para hackathon
 
-## 🙏 Agradecimentos
+---
 
-- **Base** - Pela infraestrutura blockchain
-- **Coinbase** - Pelo MiniApp ecosystem
+**🎉 Obrigado por avaliar o DoeAgora! Uma plataforma que conecta transparência blockchain com impacto social real. 🧡**
 - **OpenZeppelin** - Pelos contratos seguros
 - **Vercel** - Pelo hosting gratuito
 
