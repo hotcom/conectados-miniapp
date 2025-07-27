@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Plus, User, Wallet } from "lucide-react"
+import { Plus, User, Wallet, MessageCircle } from "lucide-react"
 import { useWalletContext } from "@/contexts/wallet-context"
 import { firebaseStorage, type Organization } from "@/lib/firebase-storage"
 
@@ -136,6 +136,12 @@ export function Sidebar() {
                   <Button className="w-full bg-blue-600 hover:bg-blue-700">
                     <Plus className="w-4 h-4 mr-2" />
                     Criar Campanha
+                  </Button>
+                </Link>
+                <Link href="/create-post">
+                  <Button variant="outline" className="w-full border-green-200 text-green-700 hover:bg-green-50">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Criar Post
                   </Button>
                 </Link>
               </div>

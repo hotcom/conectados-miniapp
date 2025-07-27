@@ -201,11 +201,20 @@ function CampaignCard({
   organization: Organization
   onChainData?: any
   formatCurrency: (value: number) => string
-  formatDate: (timestamp: number) => string
+  formatDate: (timestamp: number | any) => string
 }) {
-  const raised = onChainData?.raised || campaign.raised || 0
-  const donorCount = onChainData?.donorCount || campaign.donors || 0
+  const raised = onChainData?.raised ? parseFloat(onChainData.raised) : (campaign.raised || 0)
+  const donorCount = onChainData?.donorCount !== undefined ? onChainData.donorCount : (campaign.donors || 0)
   const progressPercentage = (raised / campaign.goal) * 100
+  
+  console.log('🎯 CampaignCard data:', {
+    campaignId: campaign.id,
+    contractAddress: campaign.contractAddress,
+    onChainData,
+    raised,
+    donorCount,
+    progressPercentage
+  })
 
   return (
     <>
