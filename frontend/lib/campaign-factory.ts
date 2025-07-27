@@ -301,8 +301,15 @@ export class Campaign {
    */
   async getCampaignInfo() {
     try {
+      console.log('🔍 Calling contract.getCampaignInfo() for address:', this.contract.address)
       const info = await this.contract.getCampaignInfo()
-      return {
+      console.log('📋 Raw contract response:', info)
+      console.log('📋 Raw info array length:', info.length)
+      console.log('📋 Raw donorCount (info[9]):', info[9])
+      console.log('📋 Raw donorCount type:', typeof info[9])
+      console.log('📋 Raw donorCount toString:', info[9]?.toString())
+      
+      const parsedData = {
         title: info[0],
         description: info[1],
         goal: ethers.utils.formatEther(info[2]),
@@ -314,8 +321,14 @@ export class Campaign {
         balance: ethers.utils.formatEther(info[8]),
         donorCount: info[9] ? info[9].toNumber() : 0
       }
+      
+      console.log('✅ Parsed campaign info:', parsedData)
+      console.log('✅ Final donorCount:', parsedData.donorCount)
+      
+      return parsedData
     } catch (error: any) {
-      console.error('Error getting campaign info:', error)
+      console.error('❌ Error getting campaign info:', error)
+      console.error('❌ Contract address:', this.contract.address)
       throw new Error(`Failed to get campaign info: ${error.message}`)
     }
   }

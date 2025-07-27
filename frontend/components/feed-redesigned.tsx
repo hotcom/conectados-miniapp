@@ -98,24 +98,40 @@ export function FeedRedesigned() {
   const loadOnChainData = async (contractAddress: string) => {
     try {
       console.log('🔗 Loading on-chain data for contract:', contractAddress)
+      console.log('🔌 Wallet connected:', isConnected)
+      console.log('🌐 Ethereum available:', !!(window as any).ethereum)
       
       // Try with connected wallet first
       if ((window as any).ethereum && isConnected) {
+        console.log('📱 Using connected wallet provider')
         const provider = new ethers.providers.Web3Provider((window as any).ethereum)
         const campaign = new CampaignContract(provider, contractAddress)
         const info = await campaign.getCampaignInfo()
-        console.log('📊 On-chain data loaded:', info)
+        console.log('📊 On-chain data loaded (wallet):', {
+          ...info,
+          donorCount: info.donorCount,
+          raised: info.raised,
+          goal: info.goal
+        })
         return info
       }
       
       // Fallback to public RPC if wallet not connected
+      console.log('🌍 Using public RPC provider')
       const publicProvider = new ethers.providers.JsonRpcProvider('https://sepolia.base.org')
       const campaign = new CampaignContract(publicProvider as any, contractAddress)
       const info = await campaign.getCampaignInfo()
-      console.log('📊 On-chain data loaded (public RPC):', info)
+      console.log('📊 On-chain data loaded (public RPC):', {
+        ...info,
+        donorCount: info.donorCount,
+        raised: info.raised,
+        goal: info.goal
+      })
       return info
     } catch (error) {
       console.error('❌ Error loading on-chain data:', error)
+      console.error('❌ Contract address:', contractAddress)
+      console.error('❌ Error details:', error)
       return null
     }
   }

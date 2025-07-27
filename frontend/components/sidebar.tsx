@@ -125,7 +125,7 @@ export function Sidebar() {
                   </div>
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Link href="/profile">
                   <Button variant="outline" className="w-full">
                     <User className="w-4 h-4 mr-2" />
