@@ -281,7 +281,7 @@ export default function SuperAppPage() {
                     <div>
                       <button 
                         onClick={() => handleOrgClick(item.organizationName, item.walletAddress)}
-                        className="font-semibold text-sm text-gray-900 hover:text-purple-600 transition-colors"
+                        className="font-semibold text-sm text-purple-600 hover:text-purple-800 transition-colors underline-offset-2 hover:underline"
                       >
                         {item.organizationName}
                       </button>
