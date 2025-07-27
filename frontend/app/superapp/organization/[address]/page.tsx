@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Heart, Target, Users, MessageCircle, Share2, MoreHorizontal, Wallet } from 'lucide-react'
+import { ArrowLeft, Heart, Target, Users, MessageCircle, Share2, MoreHorizontal, Wallet, ExternalLink } from 'lucide-react'
 import { firebaseStorage, type Campaign, type Post, type Organization } from '@/lib/firebase-storage'
 import { CAMPAIGN_ABI, BASE_SEPOLIA_CONFIG } from '@/lib/campaign-factory'
 import { useWalletContext } from '@/contexts/wallet-context'
@@ -371,7 +371,7 @@ export default function SuperAppOrganizationPage() {
 
                 {/* Donation Button for Campaigns */}
                 {item.type === 'campaign' && (
-                  <div className="px-3 pb-4">
+                  <div className="px-3 pb-4 space-y-3">
                     <button 
                       onClick={() => setDonationModal({ 
                         isOpen: true, 
@@ -388,6 +388,25 @@ export default function SuperAppOrganizationPage() {
                     >
                       💝 Doar Agora
                     </button>
+                    
+                    {/* Contract Button for Transparency */}
+                    {(item as any).contractAddress && (
+                      <button
+                        onClick={() => {
+                          const contractAddress = (item as any).contractAddress
+                          console.log('🔗 [SUPERAPP] Opening contract explorer for:', contractAddress)
+                          window.open(
+                            `https://sepolia.basescan.org/address/${contractAddress}`,
+                            '_blank',
+                            'noopener,noreferrer'
+                          )
+                        }}
+                        className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-center py-3 px-4 rounded-lg font-medium transition-all duration-200"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Ver Contrato
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
