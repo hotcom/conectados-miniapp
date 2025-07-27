@@ -117,12 +117,8 @@ export function PostCard({ post }: PostCardProps) {
           </p>
           <div className="text-sm space-y-1">
             <p className="text-blue-600 font-semibold">@{post.organization.username}</p>
-            <p className="font-bold">{post.content.split("\n")[0]}</p>
-            <p>{post.content.split("\n").slice(1).join("\n")}</p>
-            <p className="mt-2">💰 Meta: {formatCurrency(post.goal)}</p>
-            {post.contractAddress && (
-              <p className="text-sm break-all">🔗 Contrato: {post.contractAddress}</p>
-            )}
+            <p className="font-bold">{post.content.split("\n")[1] || post.content.split("\n")[0]}</p>
+            <p className="whitespace-pre-line">{post.content.split("\n").slice(2).join("\n")}</p>
           </div>
         </div>
 

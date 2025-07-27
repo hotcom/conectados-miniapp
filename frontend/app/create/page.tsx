@@ -131,13 +131,9 @@ export default function CreatePage() {
         campaignId: campaignData.id,
         content: `@${orgName}
 
-🚀 ${title}
+${title}
 
-${description}
-
-💰 Meta: ${formatBRL(goal)}
-
-🔗 Contrato: ${onChainResult.campaignContract}`,
+${description}`,
         image: imageUrl,
         createdAt: Date.now(),
         likes: 0,
