@@ -113,9 +113,10 @@ export function PostCard({ post }: PostCardProps) {
 
         <div className="w-full text-left">
           <p className="font-semibold text-sm mb-1">{likesCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} curtidas</p>
-          <p className="text-sm">
-            <span className="font-semibold">{post.organization.username}</span> {post.content}
-          </p>
+          <div className="text-sm">
+            <span className="font-semibold">{post.organization.username}</span>
+            <div className="whitespace-pre-line mt-1">{post.content}</div>
+          </div>
         </div>
 
         <div className="w-full bg-gray-50 rounded-lg p-4">

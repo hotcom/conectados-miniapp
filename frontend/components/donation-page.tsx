@@ -74,8 +74,8 @@ export function DonationPage({ postId }: DonationPageProps) {
           setCampaignData({ campaign, post, org })
           
           // Load on-chain data if available
-          if ((campaign as any).onChain && isConnected) {
-            await loadOnChainData((campaign as any).onChain.contractAddress)
+          if ((campaign as any).contractAddress && isConnected) {
+            await loadOnChainData((campaign as any).contractAddress)
           }
         }
       } catch (error) {
