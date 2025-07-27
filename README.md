@@ -109,10 +109,12 @@
 
 - **Frontend**: Next.js + React + TypeScript + Tailwind CSS
 - **Backend**: Express.js + Webhooks PIX (OpenPix)
+- **Database**: Firebase Firestore + Firebase Storage
 - **Blockchain**: Solidity + Hardhat + ethers.js
 - **Network**: Base Sepolia (84532)
 - **Token**: `cBRL` – stablecoin fictícia pareada ao real
 - **MiniApp**: Coinbase MiniKit + PWA
+- **Deploy**: Vercel (Frontend + API Routes)
 
 ---
 
