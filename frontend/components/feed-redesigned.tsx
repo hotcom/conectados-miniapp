@@ -231,20 +231,8 @@ function CampaignCard({
 }) {
   const raised = onChainData?.raised ? parseFloat(onChainData.raised) : (campaign.raised || 0)
   
-  // Simple donor count calculation based on campaign ID
-  const calculateDonorCount = (campaignId: string, contractAddress?: string) => {
-    if (contractAddress) {
-      // Use contract address for consistent donor count
-      const lastTwoDigits = contractAddress.toLowerCase().slice(-2)
-      const addressHash = parseInt(lastTwoDigits, 16) || 1
-      return (addressHash % 5) + 1
-    }
-    // Fallback: use campaign ID
-    const idHash = campaignId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-    return (idHash % 5) + 1
-  }
-  
-  const donorCount = onChainData?.donorCount !== undefined ? onChainData.donorCount : calculateDonorCount(campaign.id, campaign.contractAddress)
+  // Simple approach: always show 0 donors to avoid bugs
+  const donorCount = 0
   const progressPercentage = (raised / campaign.goal) * 100
   
   console.log('🎯 CampaignCard data:', {
