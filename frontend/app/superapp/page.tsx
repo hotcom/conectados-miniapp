@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Heart, Target, Users, MessageCircle, Share2, MoreHorizontal } from 'lucide-react'
+import { Heart, Target, Users, MessageCircle, Share2, MoreHorizontal, Wallet } from 'lucide-react'
 import { firebaseStorage, type Campaign, type Post } from '@/lib/firebase-storage'
-import { CAMPAIGN_ABI, BASE_SEPOLIA_CONFIG } from '@/lib/campaign-factory'
+import { CAMPAIGN_ABI, BASE_SEPOLIA_CONFIG, CBRL_TOKEN_ADDRESS } from '@/lib/campaign-factory'
+import { useWalletContext } from '@/contexts/wallet-context'
 import { ethers } from 'ethers'
 
 // Extended types for Instagram-style feed
@@ -26,9 +27,11 @@ interface FeedItem {
 }
 
 export default function SuperAppPage() {
+  const { isConnected, address } = useWalletContext()
   const [feedItems, setFeedItems] = useState<FeedItem[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [cBRLBalance, setCBRLBalance] = useState<string>('0')
   const [environment, setEnvironment] = useState({
     isSuperApp: false,
     userAgent: '',
@@ -48,7 +51,8 @@ export default function SuperAppPage() {
     })
     
     loadFeed()
-  }, [])
+    loadBalance()
+  }, [address])
 
   const loadFeed = async () => {
     try {
@@ -140,9 +144,40 @@ export default function SuperAppPage() {
     }
   }
   
+  const loadBalance = async () => {
+    if (!isConnected || !address) {
+      setCBRLBalance('0')
+      return
+    }
+    
+    try {
+      const rpcProvider = new ethers.providers.JsonRpcProvider(BASE_SEPOLIA_CONFIG.rpcUrl)
+      const tokenContract = new ethers.Contract(
+        CBRL_TOKEN_ADDRESS,
+        ['function balanceOf(address) view returns (uint256)'],
+        rpcProvider
+      )
+      
+      const balanceWei = await tokenContract.balanceOf(address)
+      const balanceBRL = ethers.utils.formatEther(balanceWei)
+      setCBRLBalance(parseFloat(balanceBRL).toFixed(2))
+      console.log('✅ [SUPERAPP] cBRL Balance:', balanceBRL)
+    } catch (error) {
+      console.error('❌ [SUPERAPP] Error loading cBRL balance:', error)
+      setCBRLBalance('0')
+    }
+  }
+  
   const handleRefresh = () => {
     setRefreshing(true)
     loadFeed()
+    loadBalance()
+  }
+  
+  const handleOrgClick = (organizationName: string) => {
+    // Navigate to organization profile
+    const username = organizationName.toLowerCase().replace(/\s+/g, '')
+    window.location.href = `/organization/${username}`
   }
   
   const formatCurrency = (value: number) => {
@@ -159,10 +194,10 @@ export default function SuperAppPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Instagram-style Header */}
+      {/* Instagram-style Header with Wallet Info */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-md mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                 <Heart className="w-4 h-4 text-white" />
@@ -183,6 +218,21 @@ export default function SuperAppPage() {
               </button>
             </div>
           </div>
+          
+          {/* Wallet Info */}
+          {isConnected && address && (
+            <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+              <div className="flex items-center gap-2">
+                <Wallet className="w-4 h-4 text-gray-600" />
+                <span className="text-xs font-mono text-gray-700">
+                  {address.slice(0, 6)}...{address.slice(-4)}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-semibold text-purple-600">{cBRLBalance} cBRL</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -212,7 +262,12 @@ export default function SuperAppPage() {
                       </span>
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-gray-900">{item.organizationName}</p>
+                      <button 
+                        onClick={() => handleOrgClick(item.organizationName)}
+                        className="font-semibold text-sm text-gray-900 hover:text-purple-600 transition-colors"
+                      >
+                        {item.organizationName}
+                      </button>
                       <p className="text-xs text-gray-500">
                         {item.createdAt.toLocaleDateString('pt-BR')}
                       </p>
@@ -221,6 +276,14 @@ export default function SuperAppPage() {
                   <button className="p-1 hover:bg-gray-100 rounded-full">
                     <MoreHorizontal className="w-4 h-4 text-gray-600" />
                   </button>
+                </div>
+                
+                {/* Campaign/Post Description */}
+                <div className="px-4 pb-3">
+                  <div className="text-sm text-gray-900">
+                    <span className="font-semibold">{item.organizationName}</span>{' '}
+                    {item.content}
+                  </div>
                 </div>
                 
                 {/* Post Image */}
@@ -266,24 +329,25 @@ export default function SuperAppPage() {
                   {/* Campaign Progress */}
                   {item.type === 'campaign' && (
                     <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Target className="w-4 h-4 text-purple-600" />
-                          <span className="text-sm font-medium">
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-purple-600">
                             {item.onChainRaised !== undefined 
                               ? formatCurrency(item.onChainRaised)
                               : formatCurrency(item.raised || 0)
                             }
-                          </span>
-                          <span className="text-xs text-gray-500">de {formatCurrency(item.goal || 0)}</span>
+                          </div>
+                          <div className="text-xs text-gray-500">Arrecadado</div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4 text-purple-600" />
-                          <span className="text-xs text-gray-600">0 doadores</span>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-gray-700">
+                            {formatCurrency(item.goal || 0)}
+                          </div>
+                          <div className="text-xs text-gray-500">Meta</div>
                         </div>
                       </div>
                       
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                         <div 
                           className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
                           style={{ 
@@ -295,19 +359,19 @@ export default function SuperAppPage() {
                         />
                       </div>
                       
-                      <div className="text-xs text-gray-500 mt-1 text-right">
-                        {(
-                          (item.onChainRaised !== undefined ? item.onChainRaised : (item.raised || 0)) / (item.goal || 1) * 100
-                        ).toFixed(1)}% da meta
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-gray-500">
+                          {(
+                            (item.onChainRaised !== undefined ? item.onChainRaised : (item.raised || 0)) / (item.goal || 1) * 100
+                          ).toFixed(1)}% da meta
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3 text-purple-600" />
+                          <span className="text-xs text-gray-600">0 doadores</span>
+                        </div>
                       </div>
                     </div>
                   )}
-                  
-                  {/* Post Content */}
-                  <div className="text-sm text-gray-900">
-                    <span className="font-semibold">{item.organizationName}</span>{' '}
-                    {item.content}
-                  </div>
                 </div>
               </div>
             ))}
