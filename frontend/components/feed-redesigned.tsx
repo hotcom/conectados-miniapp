@@ -97,12 +97,25 @@ export function FeedRedesigned() {
 
   const loadOnChainData = async (contractAddress: string) => {
     try {
-      const provider = new ethers.providers.Web3Provider((window as any).ethereum)
-      const campaign = new CampaignContract(provider, contractAddress)
+      console.log('🔗 Loading on-chain data for contract:', contractAddress)
+      
+      // Try with connected wallet first
+      if ((window as any).ethereum && isConnected) {
+        const provider = new ethers.providers.Web3Provider((window as any).ethereum)
+        const campaign = new CampaignContract(provider, contractAddress)
+        const info = await campaign.getCampaignInfo()
+        console.log('📊 On-chain data loaded:', info)
+        return info
+      }
+      
+      // Fallback to public RPC if wallet not connected
+      const publicProvider = new ethers.providers.JsonRpcProvider('https://sepolia.base.org')
+      const campaign = new CampaignContract(publicProvider as any, contractAddress)
       const info = await campaign.getCampaignInfo()
+      console.log('📊 On-chain data loaded (public RPC):', info)
       return info
     } catch (error) {
-      console.error('Error loading on-chain data:', error)
+      console.error('❌ Error loading on-chain data:', error)
       return null
     }
   }
@@ -229,36 +242,75 @@ function CampaignCard({
         )}
 
         <div className="bg-gray-50 rounded-lg p-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">Meta de arrecadação</span>
-            <span className="text-sm text-gray-600">{progressPercentage.toFixed(0)}%</span>
-          </div>
-          <Progress value={Math.min(progressPercentage, 100)} className="mb-2" />
-          <div className="flex justify-between text-sm">
-            <span className="text-blue-600 font-semibold">{formatCurrency(raised)}</span>
-            <span className="text-gray-600">de {formatCurrency(campaign.goal)}</span>
-          </div>
-          
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">
-                {donorCount} {donorCount === 1 ? 'doador' : 'doadores'}
-              </span>
-            </div>
-            
-            {campaign.contractAddress && (
-              <a
-                href={`https://base-sepolia.blockscout.com/address/${campaign.contractAddress}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-blue-600 hover:underline flex items-center gap-1"
-              >
-                <ExternalLink className="w-3 h-3" />
-                Ver contrato
-              </a>
-            )}
-          </div>
+          {/* Check if wallet is connected AND we have contract address */}
+          {campaign.contractAddress && onChainData ? (
+            // Show actual progress when wallet connected and we have contract data
+            <>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Meta de arrecadação</span>
+                <span className="text-sm text-gray-600">{progressPercentage.toFixed(0)}%</span>
+              </div>
+              <Progress value={Math.min(progressPercentage, 100)} className="mb-2" />
+              <div className="flex justify-between text-sm">
+                <span className="text-blue-600 font-semibold">{formatCurrency(raised)}</span>
+                <span className="text-gray-600">de {formatCurrency(campaign.goal)}</span>
+              </div>
+              
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">
+                    {donorCount} {donorCount === 1 ? 'doador único' : 'doadores únicos'}
+                  </span>
+                </div>
+                
+                <a
+                  href={`https://base-sepolia.blockscout.com/address/${campaign.contractAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Ver contrato
+                </a>
+              </div>
+            </>
+          ) : (
+            // Show different messages based on wallet connection and contract state
+            <>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Meta de arrecadação</span>
+                <span className="text-sm text-gray-600">--%</span>
+              </div>
+              <Progress value={0} className="mb-2" />
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Conecte sua carteira</span>
+                <span className="text-gray-600">para ver progresso</span>
+              </div>
+              
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 mb-2">
+                    {!campaign.contractAddress 
+                      ? 'Campanha ainda não possui contrato na blockchain'
+                      : 'Conecte sua carteira para ver dados em tempo real'
+                    }
+                  </p>
+                  {campaign.contractAddress && (
+                    <a
+                      href={`https://base-sepolia.blockscout.com/address/${campaign.contractAddress}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:underline flex items-center justify-center gap-1"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Ver contrato
+                    </a>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex gap-2">
