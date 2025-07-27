@@ -12,6 +12,7 @@ interface FeedItem {
   id: string
   type: 'campaign' | 'post'
   organizationName: string
+  walletAddress?: string
   organizationAvatar?: string
   content: string
   image?: string
@@ -98,6 +99,7 @@ export default function SuperAppPage() {
             id: campaign.id,
             type: 'campaign' as const,
             organizationName: org.name,
+            walletAddress: campaign.organizationId, // This is the wallet address
             organizationAvatar: org.avatar,
             content: campaign.description,
             image: campaign.image,
@@ -119,6 +121,7 @@ export default function SuperAppPage() {
             id: post.id,
             type: 'post' as const,
             organizationName: org.name,
+            walletAddress: post.organizationId, // This is the wallet address
             organizationAvatar: org.avatar,
             content: post.content,
             image: post.image,
@@ -174,10 +177,15 @@ export default function SuperAppPage() {
     loadBalance()
   }
   
-  const handleOrgClick = (organizationName: string) => {
-    // Navigate to organization profile
-    const username = organizationName.toLowerCase().replace(/\s+/g, '')
-    window.location.href = `/organization/${username}`
+  const handleOrgClick = (organizationName: string, walletAddress?: string) => {
+    // Navigate to organization profile using wallet address
+    if (walletAddress) {
+      window.location.href = `/organization/${walletAddress}`
+    } else {
+      // Fallback to name-based navigation
+      const username = organizationName.toLowerCase().replace(/\s+/g, '')
+      window.location.href = `/organization/${username}`
+    }
   }
   
   const formatCurrency = (value: number) => {
@@ -197,12 +205,12 @@ export default function SuperAppPage() {
       {/* Instagram-style Header with Wallet Info */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-md mx-auto px-4 py-3">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <Heart className="w-4 h-4 text-white" />
-              </div>
               <h1 className="text-xl font-bold text-gray-900">DoeAgora</h1>
+              {isConnected && (
+                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Conectada</span>
+              )}
             </div>
             
             <div className="flex items-center gap-2">
@@ -263,7 +271,7 @@ export default function SuperAppPage() {
                     </div>
                     <div>
                       <button 
-                        onClick={() => handleOrgClick(item.organizationName)}
+                        onClick={() => handleOrgClick(item.organizationName, item.walletAddress)}
                         className="font-semibold text-sm text-gray-900 hover:text-purple-600 transition-colors"
                       >
                         {item.organizationName}
@@ -329,21 +337,18 @@ export default function SuperAppPage() {
                   {/* Campaign Progress */}
                   {item.type === 'campaign' && (
                     <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="grid grid-cols-2 gap-4 mb-3">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-purple-600">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="text-sm text-gray-600">
+                          <span className="font-bold text-purple-600">
                             {item.onChainRaised !== undefined 
                               ? formatCurrency(item.onChainRaised)
                               : formatCurrency(item.raised || 0)
                             }
-                          </div>
-                          <div className="text-xs text-gray-500">Arrecadado</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-gray-700">
+                          </span>
+                          <span className="text-gray-500"> arrecadado de </span>
+                          <span className="font-bold text-gray-700">
                             {formatCurrency(item.goal || 0)}
-                          </div>
-                          <div className="text-xs text-gray-500">Meta</div>
+                          </span>
                         </div>
                       </div>
                       
