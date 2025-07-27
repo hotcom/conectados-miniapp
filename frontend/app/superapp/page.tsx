@@ -237,9 +237,9 @@ export default function SuperAppPage() {
               <button 
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
               >
-                <Heart className={`w-5 h-5 text-gray-600 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Atualizando...' : 'Atualizar'}
               </button>
             </div>
           </div>
