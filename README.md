@@ -6,8 +6,10 @@
 
 [![Deploy](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://doeagora-eight.vercel.app)
 [![MiniApp](https://img.shields.io/badge/MiniApp-Coinbase-0052FF?logo=coinbase)](https://doeagora-eight.vercel.app/superapp)
+[![Status](https://img.shields.io/badge/Status-100%25%20Funcional-brightgreen)](https://doeagora-eight.vercel.app)
 [![Network](https://img.shields.io/badge/Network-Base%20Sepolia-0052FF)](https://base-sepolia.blockscout.com)
 [![Contract](https://img.shields.io/badge/Contract-CampaignFactory-success)](https://base-sepolia.blockscout.com/address/0x28e4aDa7E2760F07517D9237c0419F2f025f91Da)
+[![Base](https://img.shields.io/badge/Base%20Sepolia-Verified-blue)](https://base-sepolia.blockscout.com)
 
 ---
 
@@ -46,6 +48,38 @@
 - ✅ **Transparência total** - Links diretos para explorer blockchain em cada campanha
 - ✅ **Sistema multiusuário** - Firebase para dados sociais + blockchain para transparência
 - ✅ **PWA completo** - Instalável como app nativo com manifest e service worker
+
+---
+
+## 🔍 **Como Auditar a Transparência**
+
+### 🎯 **POR QUE O DOEAGORA É ÚNICO:**
+
+🏗️ **Contratos Individuais por Campanha**
+- Cada campanha = 1 contrato inteligente
+- Transparência máxima: todas as doações auditáveis
+- Botão "Ver Contrato" em cada campanha
+
+👥 **Contador de Doadores Únicos On-Chain**
+- Sistema que conta doadores únicos por endereço
+- Mesmo doador = 1 contador (não inflacionado)
+- Verificável diretamente no contrato
+
+📱 **MiniApp Nativo Coinbase**
+- Integração oficial com SuperApp da Coinbase
+- Wallet conectada automaticamente
+- Interface otimizada para mobile
+
+### 🔗 **Verificar Contratos:**
+1. **Acesse qualquer campanha** no feed
+2. **Clique em "Ver Contrato"** - abre Blockscout automaticamente
+3. **Veja transações reais** - todas as doações são públicas
+4. **Contador de doadores únicos** - verificável on-chain
+
+### 🪙 **Adicionar cBRL à MetaMask:**
+- **Token Address:** `0x0f628966ea621e7283e9AB3C7935A626b9607718`
+- **Symbol:** `cBRL`
+- **Decimals:** `18`
 
 ---
 
@@ -99,6 +133,40 @@
 |----------|----------|--------|
 | `CampaignFactory` | `0x28e4aDa7E2760F07517D9237c0419F2f025f91Da` | Deploy de campanhas |
 | `cBRL Token` | `0x0f628966ea621e7283e9AB3C7935A626b9607718` | Stablecoin BRL |
+
+---
+
+## 🎯 **Fluxo Completo de Uso**
+
+### 🏢 **Para ONGs:**
+1. **Conecta carteira** → Base Sepolia
+2. **Cria perfil** → Dados salvos no Firebase
+3. **Cria campanha** → Deploy automático de contrato individual
+4. **Recebe doações** → cBRL direto no contrato
+5. **Transparência total** → Cada doação visível no explorer
+
+### 💝 **Para Doadores:**
+1. **Acessa feed** → Descobre campanhas
+2. **Clica "Ver Contrato"** → Audita transparência
+3. **Clica "Doar Agora"** → Modal simplificado
+4. **Confirma doação** → Uma única assinatura
+5. **Doação registrada** → On-chain + contador atualizado
+
+---
+
+## 🎬 **Demonstração ao Vivo**
+
+### 📱 **Teste no seu celular:**
+1. **Abra Coinbase Wallet** → SuperApp
+2. **Cole a URL:** `https://doeagora-eight.vercel.app/superapp`
+3. **Navegue pelo feed** → Interface Instagram-like
+4. **Teste doações** → Use a página de mint para tokens
+
+### 🌐 **Teste na web:**
+1. **Acesse:** `https://doeagora-eight.vercel.app`
+2. **Conecte MetaMask** → Base Sepolia
+3. **Crie uma campanha** → Veja o contrato sendo deployado
+4. **Faça uma doação** → Veja no explorer em tempo real
 
 ---
 
