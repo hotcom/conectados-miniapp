@@ -308,6 +308,27 @@ export default function SuperAppOrganizationPage() {
                 </div>
               )}
 
+              {/* Contract Button for Campaigns - Right after image */}
+              {item.type === 'campaign' && (item as any).contractAddress && (
+                <div className="px-4 pt-3">
+                  <button
+                    onClick={() => {
+                      const contractAddress = (item as any).contractAddress
+                      console.log('🔗 [SUPERAPP] Opening contract explorer for:', contractAddress)
+                      window.open(
+                        `https://sepolia.basescan.org/address/${contractAddress}`,
+                        '_blank',
+                        'noopener,noreferrer'
+                      )
+                    }}
+                    className="flex items-center justify-center gap-2 w-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-center py-2 px-4 rounded-lg font-medium transition-all duration-200 border border-blue-200"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Ver Contrato
+                  </button>
+                </div>
+              )}
+
               {/* Actions */}
               <div className="p-4">
                 <div className="flex items-center justify-between mb-3">
@@ -371,7 +392,7 @@ export default function SuperAppOrganizationPage() {
 
                 {/* Donation Button for Campaigns */}
                 {item.type === 'campaign' && (
-                  <div className="px-3 pb-4 space-y-3">
+                  <div className="px-3 pb-4">
                     <button 
                       onClick={() => setDonationModal({ 
                         isOpen: true, 
@@ -388,25 +409,6 @@ export default function SuperAppOrganizationPage() {
                     >
                       💝 Doar Agora
                     </button>
-                    
-                    {/* Contract Button for Transparency */}
-                    {(item as any).contractAddress && (
-                      <button
-                        onClick={() => {
-                          const contractAddress = (item as any).contractAddress
-                          console.log('🔗 [SUPERAPP] Opening contract explorer for:', contractAddress)
-                          window.open(
-                            `https://sepolia.basescan.org/address/${contractAddress}`,
-                            '_blank',
-                            'noopener,noreferrer'
-                          )
-                        }}
-                        className="flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-center py-3 px-4 rounded-lg font-medium transition-all duration-200"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        Ver Contrato
-                      </button>
-                    )}
                   </div>
                 )}
               </div>
