@@ -70,9 +70,9 @@ export function Header() {
       window.location.href = '/setup-profile'
       return
     }
-    // TODO: Implement create post/campaign page
+    // Redirect to create campaign page
     e.preventDefault()
-    console.log("Create clicked - feature coming soon")
+    window.location.href = '/create'
   }
 
   return (

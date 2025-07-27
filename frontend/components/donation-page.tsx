@@ -347,8 +347,8 @@ export function DonationPage({ postId }: DonationPageProps) {
                     <div className="flex items-center justify-center mb-2">
                       <Users className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div className="font-bold text-lg text-blue-600">{campaign.donors}</div>
-                    <div className="text-sm text-gray-600">doadores</div>
+                    <div className="font-bold text-lg text-blue-600">{onChainData?.donorCount || campaign.donors || 0}</div>
+                    <div className="text-sm text-gray-600">doadores únicos</div>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
@@ -410,7 +410,7 @@ export function DonationPage({ postId }: DonationPageProps) {
                 <Tabs defaultValue={campaign.contractAddress ? "cbrl" : "pix"} className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
                     {campaign.contractAddress && (
-                      <TabsTrigger value="cbrl">🪙 cBRL (On-Chain)</TabsTrigger>
+                      <TabsTrigger value="cbrl">🪙 cBRL</TabsTrigger>
                     )}
                     <TabsTrigger value="pix">💳 PIX</TabsTrigger>
                   </TabsList>

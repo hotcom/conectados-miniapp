@@ -125,7 +125,13 @@ export default function CreatePage() {
         id: firebaseStorage.generateId(),
         organizationId: address!,
         campaignId: campaignData.id,
-        content: `🚀 Nova campanha criada: ${title}\n\n${description}\n\n💰 Meta: ${formatBRL(goal)}\n🔗 Contrato: ${onChainResult.campaignContract}`,
+        content: `🚀 Nova campanha criada: ${title}
+
+${description}
+
+💰 Meta: ${formatBRL(goal)}
+
+🔗 Contrato: ${onChainResult.campaignContract}`,
         image: imageUrl,
         createdAt: Date.now(),
         likes: 0,
