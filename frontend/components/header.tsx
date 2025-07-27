@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { WalletConnect } from "@/components/wallet-connect"
 import { useWalletContext } from "@/contexts/wallet-context"
 import { firebaseStorage } from "@/lib/firebase-storage"
+import { Logo } from "@/components/logo"
 
 export function Header() {
   const wallet = useWalletContext()
@@ -79,8 +80,8 @@ export function Header() {
       <div className="max-w-6xl mx-auto px-2 sm:px-4">
         <div className="flex items-center justify-between h-12 sm:h-16">
           {/* Logo - Smaller on mobile */}
-          <Link href="/" className="text-lg sm:text-2xl font-bold text-green-600 flex-shrink-0">
-            DoeAgora
+          <Link href="/" className="flex-shrink-0">
+            <Logo size="md" />
           </Link>
 
           {/* Search - Hidden on mobile, visible on desktop */}

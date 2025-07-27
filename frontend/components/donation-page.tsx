@@ -338,9 +338,9 @@ export function DonationPage({ postId }: DonationPageProps) {
                 <div className="grid grid-cols-3 gap-4 mb-6">
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
-                      <Target className="w-5 h-5 text-green-600" />
+                      <Target className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div className="font-bold text-lg text-green-600">{formatCurrency(campaign.raised)}</div>
+                    <div className="font-bold text-lg text-blue-600">{formatCurrency(campaign.raised)}</div>
                     <div className="text-sm text-gray-600">arrecadados</div>
                   </div>
                   <div className="text-center">
@@ -379,7 +379,7 @@ export function DonationPage({ postId }: DonationPageProps) {
                 </div>
                 <Progress value={progressPercentage} className="mb-2" />
                 <div className="flex justify-between text-sm">
-                  <span className="text-green-600 font-semibold">{formatCurrency(campaign.raised)}</span>
+                  <span className="text-blue-600 font-semibold">{formatCurrency(campaign.raised)}</span>
                   <span className="text-gray-600">de {formatCurrency(campaign.goal)}</span>
                 </div>
                 {/* Donor count display */}
@@ -518,7 +518,7 @@ export function DonationPage({ postId }: DonationPageProps) {
                       </div>
                     </div>
 
-                    <Button onClick={generateQRCode} className="w-full bg-green-600 hover:bg-green-700" size="lg">
+                    <Button onClick={generateQRCode} className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
                       Gerar QR Code PIX
                     </Button>
                     

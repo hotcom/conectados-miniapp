@@ -108,7 +108,7 @@ export function Sidebar() {
               <div className="flex items-center gap-3 mb-4">
                 <Avatar className="w-14 h-14">
                   <AvatarImage src={currentOrg.avatar} />
-                  <AvatarFallback className="bg-green-100 text-green-700">
+                  <AvatarFallback className="bg-blue-100 text-blue-700">
                     {currentOrg.name.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -120,8 +120,8 @@ export function Sidebar() {
                     {currentOrg.username}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-xs text-green-600">Perfil ativo</span>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-xs text-blue-600">Perfil ativo</span>
                   </div>
                 </div>
               </div>
@@ -133,7 +133,7 @@ export function Sidebar() {
                   </Button>
                 </Link>
                 <Link href="/create">
-                  <Button className="w-full bg-green-600 hover:bg-green-700">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
                     <Plus className="w-4 h-4 mr-2" />
                     Criar Campanha
                   </Button>
@@ -152,7 +152,7 @@ export function Sidebar() {
                 </p>
               </div>
               <Link href="/setup-profile">
-                <Button className="w-full bg-green-600 hover:bg-green-700">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">
                   <Plus className="w-4 h-4 mr-2" />
                   Criar Perfil da Organização
                 </Button>
@@ -175,7 +175,7 @@ export function Sidebar() {
               <span className="text-sm text-gray-700">Emergências</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
               <span className="text-sm text-gray-700">Meio Ambiente</span>
             </div>
             <div className="flex items-center gap-2">

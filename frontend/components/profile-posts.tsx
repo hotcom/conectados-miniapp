@@ -31,7 +31,7 @@ export function ProfilePosts({ organization }: ProfilePostsProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Posts</h2>
-        <Button className="bg-green-600 hover:bg-green-700">
+        <Button className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" />
           Nova Postagem
         </Button>
@@ -47,7 +47,7 @@ export function ProfilePosts({ organization }: ProfilePostsProps) {
             <p className="text-gray-600 mb-4">
               Comece a compartilhar suas causas e impacto social!
             </p>
-            <Button className="bg-green-600 hover:bg-green-700">
+            <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
               Criar Primeiro Post
             </Button>

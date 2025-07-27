@@ -129,7 +129,7 @@ export function PostCard({ post }: PostCardProps) {
               </div>
               <Progress value={progressPercentage} className="mb-2" />
               <div className="flex justify-between text-sm">
-                <span className="text-green-600 font-semibold">{formatCurrency(post.raised)} arrecadados</span>
+                <span className="text-blue-600 font-semibold">{formatCurrency(post.raised)} arrecadados</span>
                 <span className="text-gray-600">de {formatCurrency(post.goal)}</span>
               </div>
             </>
@@ -164,7 +164,7 @@ export function PostCard({ post }: PostCardProps) {
             </>
           )}
           <Link href={`/donate/${post.id}`}>
-            <Button className="w-full mt-3 bg-green-600 hover:bg-green-700">Doar Agora</Button>
+            <Button className="w-full mt-3 bg-blue-600 hover:bg-blue-700">Doar Agora</Button>
           </Link>
         </div>
       </CardFooter>
