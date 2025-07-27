@@ -219,12 +219,12 @@ export default function SuperAppPage() {
             <div className="flex items-center gap-3">
               {/* Wallet Address and Balance */}
               {isConnected && address && (
-                <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1">
-                  <Wallet className="w-4 h-4 text-gray-600" />
-                  <span className="text-xs font-mono text-gray-700">
+                <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-2 min-w-fit">
+                  <Wallet className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                  <span className="text-xs font-mono text-gray-700 whitespace-nowrap">
                     {address.slice(0, 6)}...{address.slice(-4)}
                   </span>
-                  <span className="text-xs font-semibold text-purple-600">{cBRLBalance} cBRL</span>
+                  <span className="text-xs font-semibold text-purple-600 whitespace-nowrap">{cBRLBalance} cBRL</span>
                 </div>
               )}
               
