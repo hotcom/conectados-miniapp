@@ -47,9 +47,14 @@ export function ProfilePosts({ organization }: ProfilePostsProps) {
     }).format(value)
   }
 
-  const handleCreatePost = () => {
-    // Redirect to create page for new post/campaign
+  const handleCreateCampaign = () => {
+    // Redirect to create page for new campaign
     window.location.href = '/create'
+  }
+
+  const handleCreatePost = () => {
+    // Redirect to create-post page for new post
+    window.location.href = '/create-post'
   }
 
   if (loading) {
@@ -67,7 +72,7 @@ export function ProfilePosts({ organization }: ProfilePostsProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Perfil da Organização</h2>
-        <Button onClick={handleCreatePost} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={handleCreateCampaign} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" />
           Criar Campanha
         </Button>
@@ -90,7 +95,7 @@ export function ProfilePosts({ organization }: ProfilePostsProps) {
                 <p className="text-gray-600 mb-4">
                   Crie sua primeira campanha para começar a arrecadar fundos!
                 </p>
-                <Button onClick={handleCreatePost} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleCreateCampaign} className="bg-blue-600 hover:bg-blue-700">
                   <Plus className="w-4 h-4 mr-2" />
                   Criar Primeira Campanha
                 </Button>

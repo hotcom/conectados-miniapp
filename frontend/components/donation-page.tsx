@@ -74,8 +74,11 @@ export function DonationPage({ postId }: DonationPageProps) {
           setCampaignData({ campaign, post, org })
           
           // Load on-chain data if available
-          if ((campaign as any).contractAddress && isConnected) {
-            await loadOnChainData((campaign as any).contractAddress)
+          if (campaign.contractAddress) {
+            console.log('🔗 Loading on-chain data for contract:', campaign.contractAddress)
+            await loadOnChainData(campaign.contractAddress)
+          } else {
+            console.log('⚠️ No contract address found for campaign:', campaign.id)
           }
         }
       } catch (error) {
@@ -347,7 +350,9 @@ export function DonationPage({ postId }: DonationPageProps) {
                     <div className="flex items-center justify-center mb-2">
                       <Users className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div className="font-bold text-lg text-blue-600">{onChainData?.donorCount || campaign.donors || 0}</div>
+                    <div className="font-bold text-lg text-blue-600">
+                      {onChainData?.donorCount !== undefined ? onChainData.donorCount : (campaign.donors || 0)}
+                    </div>
                     <div className="text-sm text-gray-600">doadores únicos</div>
                   </div>
                   <div className="text-center">
@@ -383,14 +388,12 @@ export function DonationPage({ postId }: DonationPageProps) {
                   <span className="text-gray-600">de {formatCurrency(campaign.goal)}</span>
                 </div>
                 {/* Donor count display */}
-                {onChainData && (
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
-                    <Users className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">
-                      {onChainData.donorCount || 0} {(onChainData.donorCount || 0) === 1 ? 'doador único' : 'doadores únicos'}
-                    </span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
+                  <Users className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">
+                    {onChainData?.donorCount !== undefined ? onChainData.donorCount : (campaign.donors || 0)} {((onChainData?.donorCount !== undefined ? onChainData.donorCount : (campaign.donors || 0)) === 1) ? 'doador único' : 'doadores únicos'}
+                  </span>
+                </div>
                 {campaign.contractAddress && (
                   <div className="mt-2 text-xs text-gray-500">
                     <ExternalLink className="w-3 h-3 inline mr-1" />

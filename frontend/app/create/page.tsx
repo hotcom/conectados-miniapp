@@ -120,12 +120,18 @@ export default function CreatePage() {
       // Save to Firebase
       await firebaseStorage.saveCampaign(campaignData)
 
+      // Get organization name for post
+      const currentOrg = await firebaseStorage.getCurrentOrganization()
+      const orgName = currentOrg?.name || 'Organização'
+      
       // Create a post for the campaign
       const postData: Post = {
         id: firebaseStorage.generateId(),
         organizationId: address!,
         campaignId: campaignData.id,
-        content: `🚀 Nova campanha criada: ${title}
+        content: `@${orgName}
+
+🚀 ${title}
 
 ${description}
 
