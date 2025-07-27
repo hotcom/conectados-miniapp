@@ -286,76 +286,112 @@ export class Campaign {
   }
 
   /**
-   * Get unique donor count with lightweight approach
+   * Get unique donor count with lightweight approach and detailed debugging
    */
   async getUniqueDonorCount(): Promise<number> {
     try {
-      console.log('🔍 Getting unique donor count for campaign contract:', this.contract.address)
+      console.log('🔍 [DONOR COUNT DEBUG] Starting for contract:', this.contract.address)
+      console.log('🔍 [DONOR COUNT DEBUG] Contract instance:', !!this.contract)
       
       // Try multiple lightweight approaches
       let donorCount = 0
+      let approachUsed = 'none'
       
       // Approach 1: Try to get recent events with very small range
       try {
-        console.log('🔍 Trying recent events (last 1000 blocks)...')
+        console.log('🔍 [APPROACH 1] Trying recent events (last 1000 blocks)...')
+        const currentBlock = await this.contract.provider.getBlockNumber()
+        console.log('🔍 [APPROACH 1] Current block:', currentBlock)
+        
         const recentEvents = await this.contract.queryFilter('*', -1000)
-        console.log('📊 Found recent events:', recentEvents.length)
+        console.log('📊 [APPROACH 1] Found recent events:', recentEvents.length)
+        
+        // Log each event for debugging
+        recentEvents.forEach((event, index) => {
+          console.log(`📋 [EVENT ${index}] Event:`, {
+            event: event.event,
+            args: event.args,
+            blockNumber: event.blockNumber,
+            transactionHash: event.transactionHash
+          })
+        })
         
         const uniqueDonors = new Set<string>()
         recentEvents.forEach(event => {
           if (event.args) {
             const donorAddress = event.args.donor || event.args.from || event.args[0]
+            console.log('🔍 [DONOR EXTRACT] Trying to extract donor from:', event.args)
+            console.log('🔍 [DONOR EXTRACT] Donor address found:', donorAddress)
+            
             if (donorAddress && typeof donorAddress === 'string') {
               const address = donorAddress.toLowerCase()
               if (address !== '0x0000000000000000000000000000000000000000') {
                 uniqueDonors.add(address)
-                console.log('💰 Recent donor found:', address)
+                console.log('💰 [DONOR FOUND] Recent donor added:', address)
               }
             }
           }
         })
         
         donorCount = uniqueDonors.size
-        console.log('✅ Recent unique donors count:', donorCount)
+        approachUsed = 'events'
+        console.log('✅ [APPROACH 1] Recent unique donors count:', donorCount)
+        console.log('✅ [APPROACH 1] Unique donors list:', Array.from(uniqueDonors))
         
-      } catch (recentError) {
-        console.log('⚠️ Recent events failed, trying contract balance approach...')
+      } catch (recentError: any) {
+        console.log('⚠️ [APPROACH 1] Recent events failed:', recentError.message)
         
         // Approach 2: Use contract balance as indicator
         try {
+          console.log('🔍 [APPROACH 2] Trying contract balance approach...')
           const balance = await this.contract.getBalance?.()
+          console.log('🔍 [APPROACH 2] Contract balance:', balance?.toString())
+          
           if (balance && balance.gt(0)) {
             // If contract has balance, estimate donors based on average donation
             const balanceEth = parseFloat(ethers.utils.formatEther(balance))
             // Assume average donation of 10 cBRL, estimate donor count
             donorCount = Math.max(1, Math.floor(balanceEth / 10))
-            console.log('💰 Estimated donors from balance:', donorCount)
+            approachUsed = 'balance'
+            console.log('💰 [APPROACH 2] Balance in ETH:', balanceEth)
+            console.log('💰 [APPROACH 2] Estimated donors from balance:', donorCount)
           }
-        } catch (balanceError) {
-          console.log('⚠️ Balance approach failed, using fallback...')
+        } catch (balanceError: any) {
+          console.log('⚠️ [APPROACH 2] Balance approach failed:', balanceError.message)
           
           // Approach 3: Simple fallback based on raised amount
           try {
+            console.log('🔍 [APPROACH 3] Trying raised amount fallback...')
             const info = await this.contract.getCampaignInfo()
+            console.log('🔍 [APPROACH 3] Campaign info:', info)
+            
             const raised = parseFloat(ethers.utils.formatEther(info[3] || 0))
+            console.log('🔍 [APPROACH 3] Raised amount:', raised)
+            
             if (raised > 0) {
               // Estimate 1 donor per 10 cBRL raised
               donorCount = Math.max(1, Math.floor(raised / 10))
-              console.log('💰 Estimated donors from raised amount:', donorCount)
+              approachUsed = 'raised'
+              console.log('💰 [APPROACH 3] Estimated donors from raised amount:', donorCount)
             }
-          } catch (infoError) {
-            console.log('⚠️ All approaches failed, returning 0')
+          } catch (infoError: any) {
+            console.log('⚠️ [APPROACH 3] Raised amount approach failed:', infoError.message)
+            console.log('⚠️ [FINAL] All approaches failed, returning 0')
             donorCount = 0
+            approachUsed = 'failed'
           }
         }
       }
       
-      console.log('✅ Final unique donors count:', donorCount)
+      console.log('✅ [FINAL RESULT] Contract:', this.contract.address)
+      console.log('✅ [FINAL RESULT] Approach used:', approachUsed)
+      console.log('✅ [FINAL RESULT] Final unique donors count:', donorCount)
       return donorCount
       
     } catch (error: any) {
-      console.error('❌ Error getting unique donor count:', error)
-      console.error('❌ Error details:', error.message)
+      console.error('❌ [ERROR] Error getting unique donor count:', error)
+      console.error('❌ [ERROR] Error details:', error.message)
+      console.error('❌ [ERROR] Error stack:', error.stack)
       return 0
     }
   }
