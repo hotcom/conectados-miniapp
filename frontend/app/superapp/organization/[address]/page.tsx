@@ -54,12 +54,31 @@ export default function SuperAppOrganizationPage() {
       setLoading(true)
       console.log('🔄 [SUPERAPP] Loading organization profile:', organizationAddress)
 
-      // Load organization data
-      const org = await firebaseStorage.getOrganization(organizationAddress)
+      // Try to load organization data - first try direct lookup
+      let org = await firebaseStorage.getOrganization(organizationAddress)
+      
       if (!org) {
-        console.error('❌ [SUPERAPP] Organization not found:', organizationAddress)
-        return
+        console.log('⚠️ [SUPERAPP] Direct lookup failed, trying to find in all organizations...')
+        // If direct lookup fails, search through all organizations
+        const allOrgs = await firebaseStorage.getOrganizations()
+        console.log('🔍 [SUPERAPP] Found', allOrgs.length, 'organizations total')
+        
+        org = allOrgs.find(o => 
+          o.walletAddress === organizationAddress || 
+          o.id === organizationAddress
+        ) || null
+        
+        if (!org) {
+          console.error('❌ [SUPERAPP] Organization not found in any method:', organizationAddress)
+          console.log('🔍 [SUPERAPP] Available organizations:', allOrgs.map(o => ({ id: o.id, wallet: o.walletAddress, name: o.name })))
+          return
+        } else {
+          console.log('✅ [SUPERAPP] Found organization via search:', org.name)
+        }
+      } else {
+        console.log('✅ [SUPERAPP] Found organization via direct lookup:', org.name)
       }
+      
       setOrganization(org)
 
       // Load campaigns and posts for this organization
