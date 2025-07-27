@@ -9,6 +9,7 @@ import { CAMPAIGN_ABI, CBRL_TOKEN_ADDRESS } from '@/lib/campaign-factory'
 interface DonationModalProps {
   isOpen: boolean
   onClose: () => void
+  onDonationSuccess?: () => void
   campaign: {
     id: string
     title: string
@@ -19,7 +20,7 @@ interface DonationModalProps {
   }
 }
 
-export default function SuperAppDonationModal({ isOpen, onClose, campaign }: DonationModalProps) {
+export default function SuperAppDonationModal({ isOpen, onClose, onDonationSuccess, campaign }: DonationModalProps) {
   const { isConnected, address } = useWalletContext()
   const [step, setStep] = useState<'choice' | 'pix' | 'cbrl' | 'processing' | 'success' | 'error'>('choice')
   const [donationAmount, setDonationAmount] = useState('')
@@ -52,34 +53,50 @@ export default function SuperAppDonationModal({ isOpen, onClose, campaign }: Don
       const signer = web3Provider.getSigner()
       const amountWei = ethers.utils.parseEther(donationAmount)
 
-      // Single transaction: approve and donate in one call
+      // Optimized single transaction approach
       const campaignContract = new ethers.Contract(campaign.contractAddress, CAMPAIGN_ABI, signer)
-      
-      // Check if we need approval first
       const tokenContract = new ethers.Contract(
         CBRL_TOKEN_ADDRESS,
-        ['function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)'],
+        [
+          'function allowance(address,address) view returns (uint256)', 
+          'function approve(address,uint256) returns (bool)',
+          'function transfer(address,uint256) returns (bool)'
+        ],
         signer
       )
 
+      // Check current allowance
       const currentAllowance = await tokenContract.allowance(address, campaign.contractAddress)
       
-      if (currentAllowance.lt(amountWei)) {
-        // Need approval first
-        console.log('🔄 [SUPERAPP] Approving cBRL spending...')
-        const approveTx = await tokenContract.approve(campaign.contractAddress, amountWei)
+      if (currentAllowance.gte(amountWei)) {
+        // Already approved, just donate
+        console.log('🔄 [SUPERAPP] Making donation (already approved)...')
+        const donateTx = await campaignContract.donate(amountWei)
+        const receipt = await donateTx.wait()
+        setTxHash(receipt.transactionHash)
+        console.log('✅ [SUPERAPP] Donation successful:', receipt.transactionHash)
+      } else {
+        // Need to approve maximum amount to avoid future approvals
+        console.log('🔄 [SUPERAPP] Approving maximum cBRL spending for future donations...')
+        const maxApproval = ethers.constants.MaxUint256
+        const approveTx = await tokenContract.approve(campaign.contractAddress, maxApproval)
         await approveTx.wait()
-        console.log('✅ [SUPERAPP] cBRL approved')
+        console.log('✅ [SUPERAPP] cBRL approved for unlimited spending')
+        
+        // Now donate
+        console.log('🔄 [SUPERAPP] Making donation...')
+        const donateTx = await campaignContract.donate(amountWei)
+        const receipt = await donateTx.wait()
+        setTxHash(receipt.transactionHash)
+        console.log('✅ [SUPERAPP] Donation successful:', receipt.transactionHash)
       }
-
-      // Now donate
-      console.log('🔄 [SUPERAPP] Making donation...')
-      const donateTx = await campaignContract.donate(amountWei)
-      const receipt = await donateTx.wait()
       
-      setTxHash(receipt.transactionHash)
       setStep('success')
-      console.log('✅ [SUPERAPP] Donation successful:', receipt.transactionHash)
+      
+      // Trigger refresh callback
+      if (onDonationSuccess) {
+        setTimeout(() => onDonationSuccess(), 1000)
+      }
 
     } catch (error: any) {
       console.error('❌ [SUPERAPP] Donation failed:', error)
@@ -143,7 +160,7 @@ export default function SuperAppDonationModal({ isOpen, onClose, campaign }: Don
                   value={donationAmount}
                   onChange={(e) => setDonationAmount(e.target.value)}
                   placeholder="0,00"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
                 />
               </div>
 
@@ -164,6 +181,13 @@ export default function SuperAppDonationModal({ isOpen, onClose, campaign }: Don
                 >
                   <QrCode className="w-5 h-5" />
                   <span>Doar com PIX</span>
+                </button>
+                
+                <button
+                  onClick={handleClose}
+                  className="w-full p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                  Cancelar
                 </button>
               </div>
 

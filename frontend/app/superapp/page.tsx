@@ -246,6 +246,12 @@ export default function SuperAppPage() {
       <SuperAppDonationModal
         isOpen={donationModal.isOpen}
         onClose={() => setDonationModal({ isOpen: false, campaign: null })}
+        onDonationSuccess={() => {
+          // Auto-refresh feed after successful donation
+          console.log('🔄 [SUPERAPP] Auto-refreshing feed after donation...')
+          loadFeed()
+          loadBalance()
+        }}
         campaign={donationModal.campaign || {}}
       />
 
@@ -330,7 +336,7 @@ export default function SuperAppPage() {
                     </div>
                     
                     {item.type === 'campaign' && (
-                      <div className="px-4 pb-4">
+                      <div className="px-3 pb-4">
                         <button 
                           onClick={() => setDonationModal({ 
                             isOpen: true, 
@@ -343,7 +349,7 @@ export default function SuperAppPage() {
                               raised: item.raised
                             }
                           })}
-                          className="block w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-center py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02]"
+                          className="block w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-center py-4 px-6 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02]"
                         >
                           💝 Doar Agora
                         </button>
