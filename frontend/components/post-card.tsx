@@ -111,11 +111,18 @@ export function PostCard({ post }: PostCardProps) {
           </div>
         </div>
 
-        <div className="w-full text-left">
-          <p className="font-semibold text-sm mb-1">{likesCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} curtidas</p>
-          <div className="text-sm">
-            <span className="font-semibold">{post.organization.username}</span>
-            <div className="whitespace-pre-line mt-1">{post.content}</div>
+        <div className="w-full text-left space-y-2">
+          <p className="font-semibold text-sm mb-1">
+            {likesCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} curtidas
+          </p>
+          <div className="text-sm space-y-1">
+            <p className="text-blue-600 font-semibold">@{post.organization.username}</p>
+            <p className="font-bold">{post.content.split("\n")[0]}</p>
+            <p>{post.content.split("\n").slice(1).join("\n")}</p>
+            <p className="mt-2">💰 Meta: {formatCurrency(post.goal)}</p>
+            {post.contractAddress && (
+              <p className="text-sm break-all">🔗 Contrato: {post.contractAddress}</p>
+            )}
           </div>
         </div>
 
