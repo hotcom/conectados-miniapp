@@ -80,6 +80,10 @@
     {
       "source": "/.well-known/farcaster.json",
       "destination": "/api/farcaster-manifest-v2"
+    },
+    {
+      "source": "/superapp/manifest.json",
+      "destination": "/api/superapp-manifest"
     }
   ],
   "env": {

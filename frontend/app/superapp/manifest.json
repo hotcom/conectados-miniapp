@@ -1,0 +1,9 @@
+{
+  "name": "DoeAgora",
+  "description": "A primeira plataforma de doações 100% on-chain com transparência total.",
+  "url": "https://doeagora-eight.vercel.app/superapp",
+  "logoUrl": "https://doeagora-eight.vercel.app/icon.png",
+  "category": "Social",
+  "chain": "base",
+  "developer": "Rafael Costa"
+}
