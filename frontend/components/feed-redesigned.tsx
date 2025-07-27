@@ -241,6 +241,23 @@ function CampaignCard({
     donorCount,
     progressPercentage
   })
+  
+  // Test function for donor count debugging
+  const testDonorCount = () => {
+    console.log('🧪 DONOR COUNT TEST:')
+    console.log('  - Campaign ID:', campaign.id)
+    console.log('  - Contract Address:', campaign.contractAddress)
+    console.log('  - OnChain Data:', onChainData)
+    console.log('  - OnChain donorCount:', onChainData?.donorCount)
+    console.log('  - Firebase donors:', campaign.donors)
+    console.log('  - Final donorCount:', donorCount)
+    console.log('  - Type of onChainData.donorCount:', typeof onChainData?.donorCount)
+  }
+  
+  // Auto-run test for first campaign
+  if (campaign.id && typeof window !== 'undefined') {
+    setTimeout(testDonorCount, 1000)
+  }
 
   return (
     <>
