@@ -25,19 +25,32 @@ export default function ProfilePage() {
       }
 
       try {
-        // Try to get current user organization
-        let currentOrg = await firebaseStorage.getCurrentOrganization()
+        console.log('🔍 [PROFILE] Loading profile for wallet:', address)
         
-        // If no current user set, try to find by wallet address
-        if (!currentOrg && address) {
+        let currentOrg: Organization | null = null
+        
+        // ALWAYS prioritize the connected wallet address over localStorage
+        if (address) {
           const organizations = await firebaseStorage.getOrganizations()
+          console.log('📋 [PROFILE] All organizations:', organizations.map(org => ({ id: org.id, name: org.name, wallet: org.walletAddress })))
+          
           currentOrg = organizations.find((org: Organization) => 
             org.walletAddress.toLowerCase() === address.toLowerCase()
           ) || null
           
+          console.log('🎯 [PROFILE] Found organization for wallet:', currentOrg ? { id: currentOrg.id, name: currentOrg.name } : 'None')
+          
           if (currentOrg) {
+            // Update localStorage to match the connected wallet
             await firebaseStorage.setCurrentUser(currentOrg.id)
+            console.log('✅ [PROFILE] Set current user to:', currentOrg.id)
           }
+        }
+        
+        // Only fallback to localStorage if no wallet connected (shouldn't happen in this page)
+        if (!currentOrg && !address) {
+          console.log('⚠️ [PROFILE] No wallet connected, trying localStorage fallback')
+          currentOrg = await firebaseStorage.getCurrentOrganization()
         }
 
         setOrganization(currentOrg)
