@@ -310,13 +310,13 @@ export default function SuperAppOrganizationPage() {
 
               {/* Contract Button for Campaigns - Right after image */}
               {item.type === 'campaign' && (item as any).contractAddress && (
-                <div className="px-4 pt-3">
+                <div className="px-4 pt-2 pb-1">
                   <button
                     onClick={() => {
                       const contractAddress = (item as any).contractAddress
                       console.log('🔗 [SUPERAPP] Opening contract explorer for:', contractAddress)
                       window.open(
-                        `https://sepolia.basescan.org/address/${contractAddress}`,
+                        `https://base-sepolia.blockscout.com/address/${contractAddress}`,
                         '_blank',
                         'noopener,noreferrer'
                       )
