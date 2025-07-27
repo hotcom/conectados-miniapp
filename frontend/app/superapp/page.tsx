@@ -202,21 +202,38 @@ export default function SuperAppPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Instagram-style Header with Wallet Info */}
+      {/* Instagram-style Header with Logo */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-md mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl font-bold text-gray-900">DoeAgora</h1>
-              {isConnected && (
-                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Conectada</span>
-              )}
+            {/* Logo */}
+            <div className="flex items-center">
+              <img 
+                src="/doeagora-logo.svg" 
+                alt="DoeAgora" 
+                className="h-8 w-auto"
+              />
             </div>
             
-            <div className="flex items-center gap-2">
+            {/* Wallet Info and Actions */}
+            <div className="flex items-center gap-3">
+              {/* Wallet Address and Balance */}
+              {isConnected && address && (
+                <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1">
+                  <Wallet className="w-4 h-4 text-gray-600" />
+                  <span className="text-xs font-mono text-gray-700">
+                    {address.slice(0, 6)}...{address.slice(-4)}
+                  </span>
+                  <span className="text-xs font-semibold text-purple-600">{cBRLBalance} cBRL</span>
+                </div>
+              )}
+              
+              {/* SuperApp Badge */}
               {environment.isSuperApp && (
                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">SuperApp</span>
               )}
+              
+              {/* Refresh Button */}
               <button 
                 onClick={handleRefresh}
                 disabled={refreshing}
@@ -226,21 +243,6 @@ export default function SuperAppPage() {
               </button>
             </div>
           </div>
-          
-          {/* Wallet Info */}
-          {isConnected && address && (
-            <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
-              <div className="flex items-center gap-2">
-                <Wallet className="w-4 h-4 text-gray-600" />
-                <span className="text-xs font-mono text-gray-700">
-                  {address.slice(0, 6)}...{address.slice(-4)}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-xs font-semibold text-purple-600">{cBRLBalance} cBRL</span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
