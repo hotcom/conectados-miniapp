@@ -1,7 +1,7 @@
 "use client"
 
 import { Header } from "@/components/header"
-import { Feed } from "@/components/feed"
+import { FeedRedesigned } from "@/components/feed-redesigned"
 import { Sidebar } from "@/components/sidebar"
 
 export default function HomePage() {
@@ -15,7 +15,7 @@ export default function HomePage() {
             <Sidebar />
           </div>
           <div className="lg:col-span-2">
-            <Feed />
+            <FeedRedesigned />
           </div>
           <div className="lg:col-span-1">
             <div className="sticky top-20">

@@ -20,8 +20,11 @@ export function ProfilePosts({ organization }: ProfilePostsProps) {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Load posts for this organization
-        const organizationPosts = await firebaseStorage.getPostsByOrganization(organization.id)
+        // Load posts for this organization (only simple posts, not campaign-related)
+        const allPosts = await firebaseStorage.getPosts()
+        const organizationPosts = allPosts.filter((post: Post) => 
+          post.organizationId === organization.walletAddress && !post.campaignId
+        )
         setPosts(organizationPosts)
         
         // Load campaigns for this organization

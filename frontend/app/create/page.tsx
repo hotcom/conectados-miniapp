@@ -119,27 +119,9 @@ export default function CreatePage() {
 
       // Save to Firebase
       await firebaseStorage.saveCampaign(campaignData)
-
-      // Get organization name for post
-      const currentOrg = await firebaseStorage.getCurrentOrganization()
-      const orgName = currentOrg?.name || 'Organização'
       
-      // Create a post for the campaign
-      const postData: Post = {
-        id: firebaseStorage.generateId(),
-        organizationId: address!,
-        campaignId: campaignData.id,
-        content: `@${orgName}
-
-${title}
-
-${description}`,
-        image: imageUrl,
-        createdAt: Date.now(),
-        likes: 0,
-        shares: 0
-      }
-      await firebaseStorage.savePost(postData)
+      // Note: Campaigns are now separate from posts
+      // Users can create posts manually to announce campaigns if desired
 
       setDeploymentStatus("Finalizando...")
       await new Promise((resolve) => setTimeout(resolve, 500))
