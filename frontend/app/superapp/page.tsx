@@ -1,10 +1,34 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Heart, RefreshCw } from 'lucide-react'
+import { Heart, Target, Users, MessageCircle, Share2, MoreHorizontal } from 'lucide-react'
+import { firebaseStorage, type Campaign, type Post } from '@/lib/firebase-storage'
+import { CAMPAIGN_ABI, BASE_SEPOLIA_CONFIG } from '@/lib/campaign-factory'
+import { ethers } from 'ethers'
+
+// Extended types for Instagram-style feed
+interface FeedItem {
+  id: string
+  type: 'campaign' | 'post'
+  organizationName: string
+  organizationAvatar?: string
+  content: string
+  image?: string
+  createdAt: Date
+  // Campaign specific
+  goal?: number
+  raised?: number
+  onChainRaised?: number
+  contractAddress?: string
+  // Post specific
+  likes?: number
+  shares?: number
+}
 
 export default function SuperAppPage() {
-  const [status, setStatus] = useState('Loading...')
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [environment, setEnvironment] = useState({
     isSuperApp: false,
     userAgent: '',
@@ -12,89 +36,283 @@ export default function SuperAppPage() {
   })
 
   useEffect(() => {
-    try {
-      // Detect environment
-      const userAgent = navigator.userAgent
-      const url = window.location.href
-      const isSuperApp = userAgent.includes('Coinbase') || userAgent.includes('SuperApp')
-      
-      setEnvironment({
-        isSuperApp,
-        userAgent,
-        url
-      })
-      
-      setStatus('✅ SuperApp interface loaded successfully')
-    } catch (error) {
-      console.error('SuperApp initialization error:', error)
-      setStatus(`❌ Error: ${error}`)
-    }
+    // Detect environment
+    const userAgent = navigator.userAgent
+    const url = window.location.href
+    const isSuperApp = userAgent.includes('Coinbase') || userAgent.includes('SuperApp')
+    
+    setEnvironment({
+      isSuperApp,
+      userAgent,
+      url
+    })
+    
+    loadFeed()
   }, [])
 
+  const loadFeed = async () => {
+    try {
+      console.log('🔄 [SUPERAPP] Loading Instagram-style feed...')
+      setLoading(true)
+      
+      // Load campaigns and posts from Firebase
+      const [campaigns, posts, organizations] = await Promise.all([
+        firebaseStorage.getCampaigns(),
+        firebaseStorage.getPosts(),
+        firebaseStorage.getOrganizations()
+      ])
+      
+      console.log('📊 [SUPERAPP] Loaded data:', { campaigns: campaigns.length, posts: posts.length, orgs: organizations.length })
+      
+      // Create organization lookup
+      const orgLookup = organizations.reduce((acc, org) => {
+        acc[org.id] = org
+        acc[org.walletAddress] = org
+        return acc
+      }, {} as Record<string, any>)
+      
+      // Convert campaigns to feed items with on-chain data
+      const campaignItems: FeedItem[] = await Promise.all(
+        campaigns.map(async (campaign) => {
+          const org = orgLookup[campaign.organizationId] || { name: 'ONG Desconhecida', avatar: undefined }
+          
+          // Try to get on-chain data
+          let onChainRaised: number | undefined
+          if (campaign.contractAddress) {
+            try {
+              const rpcProvider = new ethers.providers.JsonRpcProvider(BASE_SEPOLIA_CONFIG.rpcUrl)
+              const campaignContract = new ethers.Contract(campaign.contractAddress, CAMPAIGN_ABI, rpcProvider)
+              const raisedWei = await campaignContract.raised()
+              onChainRaised = parseFloat(ethers.utils.formatEther(raisedWei))
+              console.log('✅ [SUPERAPP] On-chain data for', campaign.title, ':', onChainRaised, 'BRL')
+            } catch (error) {
+              console.log('⚠️ [SUPERAPP] Failed to load on-chain data for', campaign.title)
+            }
+          }
+          
+          return {
+            id: campaign.id,
+            type: 'campaign' as const,
+            organizationName: org.name,
+            organizationAvatar: org.avatar,
+            content: campaign.description,
+            image: campaign.image,
+            createdAt: typeof campaign.createdAt === 'number' ? new Date(campaign.createdAt) : campaign.createdAt.toDate(),
+            goal: campaign.goal,
+            raised: campaign.raised,
+            onChainRaised,
+            contractAddress: campaign.contractAddress
+          }
+        })
+      )
+      
+      // Convert posts to feed items
+      const postItems: FeedItem[] = posts
+        .filter(post => !post.campaignId) // Only simple posts
+        .map(post => {
+          const org = orgLookup[post.organizationId] || { name: 'ONG Desconhecida', avatar: undefined }
+          return {
+            id: post.id,
+            type: 'post' as const,
+            organizationName: org.name,
+            organizationAvatar: org.avatar,
+            content: post.content,
+            image: post.image,
+            createdAt: typeof post.createdAt === 'number' ? new Date(post.createdAt) : post.createdAt.toDate(),
+            likes: post.likes,
+            shares: post.shares
+          }
+        })
+      
+      // Combine and sort by date (newest first)
+      const allItems = [...campaignItems, ...postItems].sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      )
+      
+      setFeedItems(allItems)
+      console.log('✅ [SUPERAPP] Feed loaded with', allItems.length, 'items')
+      
+    } catch (error) {
+      console.error('❌ [SUPERAPP] Error loading feed:', error)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }
+  
+  const handleRefresh = () => {
+    setRefreshing(true)
+    loadFeed()
+  }
+  
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value)
+  }
+  
+  const handleDonate = (campaignId: string) => {
+    // Navigate to donation page
+    window.location.href = `/donate/${campaignId}`
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Simple Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <div className="min-h-screen bg-gray-50">
+      {/* Instagram-style Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-md mx-auto px-4 py-3">
-          <div className="flex items-center justify-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-              <Heart className="w-4 h-4 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                <Heart className="w-4 h-4 text-white" />
+              </div>
+              <h1 className="text-xl font-bold text-gray-900">DoeAgora</h1>
             </div>
-            <h1 className="text-lg font-bold text-gray-900">DoeAgora</h1>
-            {environment.isSuperApp && (
-              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">SuperApp</span>
-            )}
+            
+            <div className="flex items-center gap-2">
+              {environment.isSuperApp && (
+                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">SuperApp</span>
+              )}
+              <button 
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <Heart className={`w-5 h-5 text-gray-600 ${refreshing ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-md mx-auto p-4">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-4">
-          <h2 className="text-xl font-bold text-center mb-4">🎉 Bem-vindo ao DoeAgora!</h2>
-          
-          <div className="text-center mb-6">
-            <div className="text-4xl mb-2">💝</div>
-            <p className="text-gray-600">
-              Plataforma descentralizada para doações transparentes na blockchain Base
-            </p>
+      {/* Instagram-style Feed */}
+      <div className="max-w-md mx-auto">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+            <span className="ml-3 text-gray-600">Carregando feed...</span>
           </div>
-
-          <div className="space-y-3 mb-6">
-            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-green-800">Doações via PIX convertidas em cBRL</span>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-blue-800">Transparência total na blockchain</span>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span className="text-sm text-purple-800">Para ONGs e organizações sociais</span>
-            </div>
+        ) : feedItems.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">📝</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum conteúdo ainda</h3>
+            <p className="text-gray-600">As campanhas e posts aparecerão aqui!</p>
           </div>
-
-          <div className="text-center">
-            <button 
-              onClick={() => window.location.href = '/'}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 px-4 rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-md"
-            >
-              🚀 Explorar Campanhas
-            </button>
+        ) : (
+          <div className="space-y-0">
+            {feedItems.map((item) => (
+              <div key={item.id} className="bg-white border-b border-gray-200">
+                {/* Post Header */}
+                <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">
+                        {item.organizationName.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-gray-900">{item.organizationName}</p>
+                      <p className="text-xs text-gray-500">
+                        {item.createdAt.toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+                  </div>
+                  <button className="p-1 hover:bg-gray-100 rounded-full">
+                    <MoreHorizontal className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
+                
+                {/* Post Image */}
+                {item.image && (
+                  <div className="aspect-square bg-gray-100">
+                    <img 
+                      src={item.image} 
+                      alt="Post content" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/api/placeholder/400/400'
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {/* Post Actions */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-4">
+                      <button className="flex items-center gap-1 hover:text-red-500 transition-colors">
+                        <Heart className="w-5 h-5" />
+                        <span className="text-sm">{item.likes || 0}</span>
+                      </button>
+                      <button className="flex items-center gap-1 hover:text-blue-500 transition-colors">
+                        <MessageCircle className="w-5 h-5" />
+                      </button>
+                      <button className="flex items-center gap-1 hover:text-green-500 transition-colors">
+                        <Share2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                    
+                    {item.type === 'campaign' && (
+                      <button 
+                        onClick={() => handleDonate(item.id)}
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-md"
+                      >
+                        💰 Doar
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Campaign Progress */}
+                  {item.type === 'campaign' && (
+                    <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Target className="w-4 h-4 text-purple-600" />
+                          <span className="text-sm font-medium">
+                            {item.onChainRaised !== undefined 
+                              ? formatCurrency(item.onChainRaised)
+                              : formatCurrency(item.raised || 0)
+                            }
+                          </span>
+                          <span className="text-xs text-gray-500">de {formatCurrency(item.goal || 0)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4 text-purple-600" />
+                          <span className="text-xs text-gray-600">0 doadores</span>
+                        </div>
+                      </div>
+                      
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+                          style={{ 
+                            width: `${Math.min(
+                              ((item.onChainRaised !== undefined ? item.onChainRaised : (item.raised || 0)) / (item.goal || 1) * 100), 
+                              100
+                            )}%` 
+                          }}
+                        />
+                      </div>
+                      
+                      <div className="text-xs text-gray-500 mt-1 text-right">
+                        {(
+                          (item.onChainRaised !== undefined ? item.onChainRaised : (item.raised || 0)) / (item.goal || 1) * 100
+                        ).toFixed(1)}% da meta
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Post Content */}
+                  <div className="text-sm text-gray-900">
+                    <span className="font-semibold">{item.organizationName}</span>{' '}
+                    {item.content}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-
-        {/* Status Info */}
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <h3 className="font-semibold mb-2">📊 Status:</h3>
-          <p className="text-sm text-gray-600 mb-2">{status}</p>
-          
-          <div className="text-xs text-gray-500 space-y-1">
-            <p><strong>Environment:</strong> {environment.isSuperApp ? 'Coinbase SuperApp' : 'Web Browser'}</p>
-            <p><strong>Time:</strong> {new Date().toLocaleString()}</p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   )
