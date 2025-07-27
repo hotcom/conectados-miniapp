@@ -211,7 +211,7 @@ export default function SuperAppPage() {
               <img 
                 src="/doeagora-logo.svg" 
                 alt="DoeAgora" 
-                className="h-8 w-auto"
+                className="h-12 w-auto"
               />
             </div>
             
@@ -232,15 +232,6 @@ export default function SuperAppPage() {
               {environment.isSuperApp && (
                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">SuperApp</span>
               )}
-              
-              {/* Refresh Button */}
-              <button 
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                {refreshing ? 'Atualizando...' : 'Atualizar'}
-              </button>
             </div>
           </div>
         </div>
