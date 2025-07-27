@@ -1,37 +1,56 @@
-# Donation Social Network
+# DoeAgora - Doações Descentralizadas
 
-Rede social para doações com integração blockchain e PIX.
+> **MiniApp para Coinbase Super App** - Plataforma descentralizada para ONGs criarem perfis, campanhas e receberem doações em cBRL na Base Sepolia
 
-## Estrutura do Projeto
+[![Deploy](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://doeagora-eight.vercel.app)
+[![MiniApp](https://img.shields.io/badge/MiniApp-Coinbase%20SuperApp-0052FF?logo=coinbase)](https://doeagora-eight.vercel.app/superapp)
+[![Network](https://img.shields.io/badge/Network-Base%20Sepolia-0052FF)](https://base-sepolia.blockscout.com)
+[![Contract](https://img.shields.io/badge/Contract-CampaignFactory-success)](https://base-sepolia.blockscout.com/address/0x28e4aDa7E2760F07517D9237c0419F2f025f91Da)
 
-```
-donation-app/
-├── frontend/           # Next.js App (Interface do usuário)
-├── backend/           # API Express.js (Webhook PIX, autenticação)
-├── contracts/         # 🌟 Conectados - Doações Descentralizadas
+---
 
-> **MiniApp para Coinbase Super App** - Plataforma descentralizada para ONGs criarem perfis, campanhas e receberem doações em cBRL na Base
+## 🏆 **PARA OS JURADOS DO HACKATHON**
 
-[![Deploy](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://conectados-miniapp.vercel.app)
-[![MiniApp](https://img.shields.io/badge/MiniApp-Coinbase-0052FF?logo=coinbase)](https://wallet.coinbase.com/miniapp/conectados)
-[![Network](https://img.shields.io/badge/Network-Base%20Sepolia-0052FF)](https://sepolia.basescan.org)
+### 🚀 **TESTE AGORA - LINKS DIRETOS:**
 
-## 🚀 Funcionalidades
+1. **🌐 Interface Web Completa:** https://doeagora-eight.vercel.app
+2. **📱 MiniApp SuperApp:** https://doeagora-eight.vercel.app/superapp
+3. **🔗 Contrato Principal:** https://base-sepolia.blockscout.com/address/0x28e4aDa7E2760F07517D9237c0419F2f025f91Da
+4. **💰 Token cBRL:** https://base-sepolia.blockscout.com/address/0x0f628966ea621e7283e9AB3C7935A626b9607718
 
-### 🏢 Para ONGs
-- ✅ **Criar perfil institucional** com verificação
-- ✅ **Campanhas on-chain** com contratos individuais
-- ✅ **Upload de imagens** e conteúdo rico
-- ✅ **Transparência total** via blockchain
-- ✅ **Doações em cBRL** (stablecoin BRL)
+### 🎯 **DIFERENCIAIS INOVADORES:**
 
-### 💝 Para Doadores
-- ✅ **Doações diretas** em cBRL
+- ✅ **MiniApp nativo** para Coinbase Super App
+- ✅ **Contratos individuais** para cada campanha (transparência total)
+- ✅ **Contador de doadores únicos** on-chain
+- ✅ **Interface Instagram-like** mobile-first
+- ✅ **Integração cBRL** (stablecoin BRL na Base)
+- ✅ **Transparência blockchain** com links diretos para explorer
+- ✅ **Sistema multiusuário** com Firebase
+- ✅ **PWA completo** com manifest e service worker
+
+---
+
+## 🚀 **FUNCIONALIDADES IMPLEMENTADAS**
+
+### 🏢 **Para ONGs e Organizações**
+- ✅ **Perfil institucional completo** com avatar e descrição
+- ✅ **Criação de campanhas** com deploy automático de contrato individual
+- ✅ **Upload de imagens** com fallback Firebase Storage
+- ✅ **Posts sociais** para engajamento da comunidade
+- ✅ **Dashboard de gestão** com estatísticas em tempo real
+- ✅ **Transparência total** via blockchain explorer
+
+### 💝 **Para Doadores**
+- ✅ **Conexão de carteira** (MetaMask, Coinbase Wallet)
+- ✅ **Doações diretas em cBRL** com uma única assinatura
+- ✅ **Feed Instagram-style** com campanhas e posts
 - ✅ **Progresso em tempo real** das campanhas
-- ✅ **Contador de doadores únicos**
-- ✅ **Histórico on-chain** verificável
-- ✅ **Interface mobile-first**
+- ✅ **Contador de doadores únicos** on-chain
+- ✅ **Histórico verificável** na blockchain
+- ✅ **Interface mobile-first** otimizada
 
+### 📱 **MiniApp Coinbase Super App**
 ### 📱 MiniApp Coinbase
 - ✅ **Integração nativa** com Coinbase Super App
 - ✅ **Wallet connection** automática
