@@ -6,33 +6,87 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Heart, MessageCircle, Target, Users } from "lucide-react"
 import { type Organization, type Post, type Campaign, firebaseStorage } from "@/lib/firebase-storage"
+import { CAMPAIGN_ABI, BASE_SEPOLIA_CONFIG } from "@/lib/campaign-factory"
+import { ethers } from "ethers"
 import Link from "next/link"
 
 interface ProfilePostsProps {
   organization: Organization
 }
 
+// Extended campaign type with on-chain data
+interface CampaignWithOnChain extends Campaign {
+  onChainRaised?: number
+  onChainDonorCount?: number
+}
+
 export function ProfilePosts({ organization }: ProfilePostsProps) {
   const [posts, setPosts] = useState<Post[]>([])
-  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [campaigns, setCampaigns] = useState<CampaignWithOnChain[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Load posts for this organization (only simple posts, not campaign-related)
+        // Load posts for this organization (try both organizationId and walletAddress)
         const allPosts = await firebaseStorage.getPosts()
-        const organizationPosts = allPosts.filter((post: Post) => 
-          post.organizationId === organization.walletAddress && !post.campaignId
-        )
+        const organizationPosts = allPosts.filter((post: Post) => {
+          // Filter posts that belong to this organization
+          const belongsToOrg = post.organizationId === organization.walletAddress || 
+                              post.organizationId === organization.id
+          // Only show simple posts (not campaign-related)
+          return belongsToOrg && !post.campaignId
+        })
         setPosts(organizationPosts)
+        console.log('📝 [PROFILE POSTS] Loaded posts for org:', organization.walletAddress, organizationPosts.length)
         
         // Load campaigns for this organization
         const allCampaigns = await firebaseStorage.getCampaigns()
         const organizationCampaigns = allCampaigns.filter((campaign: Campaign) => 
-          campaign.organizationId === organization.walletAddress
+          campaign.organizationId === organization.walletAddress || 
+          campaign.organizationId === organization.id
         )
-        setCampaigns(organizationCampaigns)
+        
+        // Enrich campaigns with on-chain data
+        const campaignsWithOnChain: CampaignWithOnChain[] = await Promise.all(
+          organizationCampaigns.map(async (campaign) => {
+            if (campaign.contractAddress) {
+              try {
+                console.log('🔍 [PROFILE CAMPAIGN] Loading on-chain data for:', campaign.contractAddress)
+                // Create RPC provider for read-only operations
+                const rpcProvider = new ethers.providers.JsonRpcProvider(BASE_SEPOLIA_CONFIG.rpcUrl)
+                const campaignContract = new ethers.Contract(campaign.contractAddress, CAMPAIGN_ABI, rpcProvider)
+                
+                // Call the raised() function to get current raised amount
+                const raisedWei = await campaignContract.raised()
+                const raisedBRL = parseFloat(ethers.utils.formatEther(raisedWei))
+                
+                console.log('✅ [PROFILE CAMPAIGN] On-chain raised:', raisedBRL, 'BRL')
+                
+                return {
+                  ...campaign,
+                  onChainRaised: raisedBRL,
+                  onChainDonorCount: 0 // Always 0 as per user request
+                }
+              } catch (error) {
+                console.error('❌ [PROFILE CAMPAIGN] Error loading on-chain data:', error)
+                return {
+                  ...campaign,
+                  onChainRaised: undefined,
+                  onChainDonorCount: 0
+                }
+              }
+            }
+            return {
+              ...campaign,
+              onChainRaised: undefined,
+              onChainDonorCount: 0
+            }
+          })
+        )
+        
+        setCampaigns(campaignsWithOnChain)
+        console.log('🎯 [PROFILE CAMPAIGNS] Loaded campaigns for org:', organization.walletAddress, campaignsWithOnChain.length)
       } catch (error) {
         console.error('Error loading data:', error)
       } finally {
@@ -117,12 +171,16 @@ export function ProfilePosts({ organization }: ProfilePostsProps) {
                         <div className="flex items-center gap-6 text-sm">
                           <div className="flex items-center gap-2">
                             <Target className="w-4 h-4 text-blue-600" />
-                            <span className="font-medium">{formatCurrency(campaign.raised || 0)}</span>
+                            <span className="font-medium">
+                              {campaign.onChainRaised !== undefined 
+                                ? formatCurrency(campaign.onChainRaised) 
+                                : formatCurrency(campaign.raised || 0)}
+                            </span>
                             <span className="text-gray-500">de {formatCurrency(campaign.goal)}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Users className="w-4 h-4 text-blue-600" />
-                            <span>{campaign.donorCount || 0} doadores</span>
+                            <span>{campaign.onChainDonorCount || 0} doadores</span>
                           </div>
                         </div>
                         
@@ -130,11 +188,18 @@ export function ProfilePosts({ organization }: ProfilePostsProps) {
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div 
                               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${Math.min((campaign.raised || 0) / campaign.goal * 100, 100)}%` }}
+                              style={{ 
+                                width: `${Math.min(
+                                  ((campaign.onChainRaised !== undefined ? campaign.onChainRaised : (campaign.raised || 0)) / campaign.goal * 100), 
+                                  100
+                                )}%` 
+                              }}
                             />
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
-                            {((campaign.raised || 0) / campaign.goal * 100).toFixed(1)}% da meta
+                            {(
+                              (campaign.onChainRaised !== undefined ? campaign.onChainRaised : (campaign.raised || 0)) / campaign.goal * 100
+                            ).toFixed(1)}% da meta
                           </div>
                         </div>
                       </div>
