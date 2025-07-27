@@ -297,17 +297,65 @@ export class Campaign {
   }
 
   /**
-   * Get campaign information
+   * Get unique donor count by analyzing blockchain events
+   */
+  async getUniqueDonorCount(): Promise<number> {
+    try {
+      console.log('🔍 Getting unique donor count for contract:', this.contract.address)
+      
+      // Get all Transfer events from cBRL token to this campaign contract
+      const cBRLAddress = '0x0f628966ea621e7283e9AB3C7935A626b9607718'
+      const cBRLABI = [
+        'event Transfer(address indexed from, address indexed to, uint256 value)'
+      ]
+      
+      const cBRLContract = new ethers.Contract(cBRLAddress, cBRLABI, this.provider)
+      
+      // Filter for transfers TO this campaign contract
+      const filter = cBRLContract.filters.Transfer(null, this.contract.address)
+      
+      // Get events from contract deployment to now
+      const events = await cBRLContract.queryFilter(filter, 0, 'latest')
+      
+      console.log('📊 Found transfer events:', events.length)
+      
+      // Extract unique donor addresses
+      const uniqueDonors = new Set<string>()
+      
+      events.forEach(event => {
+        if (event.args && event.args.from) {
+          // Exclude zero address (minting) and contract addresses
+          const fromAddress = event.args.from.toLowerCase()
+          if (fromAddress !== '0x0000000000000000000000000000000000000000') {
+            uniqueDonors.add(fromAddress)
+            console.log('💰 Donor found:', fromAddress)
+          }
+        }
+      })
+      
+      const donorCount = uniqueDonors.size
+      console.log('✅ Unique donors count:', donorCount)
+      console.log('✅ Unique donors:', Array.from(uniqueDonors))
+      
+      return donorCount
+      
+    } catch (error: any) {
+      console.error('❌ Error getting unique donor count:', error)
+      return 0
+    }
+  }
+
+  /**
+   * Get campaign information with real unique donor count
    */
   async getCampaignInfo() {
     try {
       console.log('🔍 Calling contract.getCampaignInfo() for address:', this.contract.address)
       const info = await this.contract.getCampaignInfo()
       console.log('📋 Raw contract response:', info)
-      console.log('📋 Raw info array length:', info.length)
-      console.log('📋 Raw donorCount (info[9]):', info[9])
-      console.log('📋 Raw donorCount type:', typeof info[9])
-      console.log('📋 Raw donorCount toString:', info[9]?.toString())
+      
+      // Get real unique donor count from blockchain events
+      const realDonorCount = await this.getUniqueDonorCount()
       
       const parsedData = {
         title: info[0],
@@ -319,11 +367,11 @@ export class Campaign {
         createdAt: new Date(info[6].toNumber() * 1000),
         active: info[7],
         balance: ethers.utils.formatEther(info[8]),
-        donorCount: info[9] ? info[9].toNumber() : 0
+        donorCount: realDonorCount // Use real count from events
       }
       
-      console.log('✅ Parsed campaign info:', parsedData)
-      console.log('✅ Final donorCount:', parsedData.donorCount)
+      console.log('✅ Parsed campaign info with real donor count:', parsedData)
+      console.log('✅ Real donorCount:', parsedData.donorCount)
       
       return parsedData
     } catch (error: any) {
