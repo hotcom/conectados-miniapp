@@ -183,13 +183,11 @@ export default function SuperAppPage() {
   }
   
   const handleOrgClick = (organizationName: string, walletAddress?: string) => {
-    // Navigate to organization profile using wallet address
+    // Navigate to organization profile in SuperApp
     if (walletAddress) {
-      window.location.href = `/organization/${walletAddress}`
+      window.location.href = `/superapp/organization/${walletAddress}`
     } else {
-      // Fallback to name-based navigation
-      const username = organizationName.toLowerCase().replace(/\s+/g, '')
-      window.location.href = `/organization/${username}`
+      console.warn('⚠️ [SUPERAPP] No wallet address provided for organization:', organizationName)
     }
   }
   
