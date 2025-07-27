@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Heart, Target, Users, MessageCircle, Share2, MoreHorizontal, Wallet } from 'lucide-react'
+import { Heart, Target, Users, MessageCircle, Share2, MoreHorizontal, Wallet, User } from 'lucide-react'
 import { firebaseStorage, type Campaign, type Post } from '@/lib/firebase-storage'
 import { CAMPAIGN_ABI, BASE_SEPOLIA_CONFIG, CBRL_TOKEN_ADDRESS } from '@/lib/campaign-factory'
 import { useWalletContext } from '@/contexts/wallet-context'
@@ -290,8 +290,12 @@ export default function SuperAppPage() {
                       </p>
                     </div>
                   </div>
-                  <button className="p-1 hover:bg-gray-100 rounded-full">
-                    <MoreHorizontal className="w-4 h-4 text-gray-600" />
+                  <button 
+                    onClick={() => handleOrgClick(item.organizationName, item.walletAddress)}
+                    className="flex items-center gap-1 px-3 py-1 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-full text-xs font-medium transition-colors"
+                  >
+                    <User className="w-3 h-3" />
+                    <span>Ver Perfil</span>
                   </button>
                 </div>
                 
