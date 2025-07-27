@@ -6,6 +6,7 @@ import { firebaseStorage, type Campaign, type Post } from '@/lib/firebase-storag
 import { CAMPAIGN_ABI, BASE_SEPOLIA_CONFIG, CBRL_TOKEN_ADDRESS } from '@/lib/campaign-factory'
 import { useWalletContext } from '@/contexts/wallet-context'
 import { ethers } from 'ethers'
+import SuperAppDonationModal from '@/components/superapp-donation-modal'
 
 // Extended types for Instagram-style feed
 interface FeedItem {
@@ -33,6 +34,10 @@ export default function SuperAppPage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [cBRLBalance, setCBRLBalance] = useState<string>('0')
+  const [donationModal, setDonationModal] = useState<{
+    isOpen: boolean
+    campaign: any
+  }>({ isOpen: false, campaign: null })
   const [environment, setEnvironment] = useState({
     isSuperApp: false,
     userAgent: '',
@@ -237,6 +242,13 @@ export default function SuperAppPage() {
         </div>
       </div>
 
+      {/* Donation Modal */}
+      <SuperAppDonationModal
+        isOpen={donationModal.isOpen}
+        onClose={() => setDonationModal({ isOpen: false, campaign: null })}
+        campaign={donationModal.campaign || {}}
+      />
+
       {/* Instagram-style Feed */}
       <div className="max-w-md mx-auto">
         {loading ? (
@@ -318,12 +330,24 @@ export default function SuperAppPage() {
                     </div>
                     
                     {item.type === 'campaign' && (
-                      <button 
-                        onClick={() => handleDonate(item.id)}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-md"
-                      >
-                        💰 Doar
-                      </button>
+                      <div className="px-4 pb-4">
+                        <button 
+                          onClick={() => setDonationModal({ 
+                            isOpen: true, 
+                            campaign: {
+                              id: item.id,
+                              title: item.content,
+                              organizationName: item.organizationName,
+                              contractAddress: (item as any).contractAddress,
+                              goal: item.goal,
+                              raised: item.raised
+                            }
+                          })}
+                          className="block w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-center py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02]"
+                        >
+                          💝 Doar Agora
+                        </button>
+                      </div>
                     )}
                   </div>
                   
