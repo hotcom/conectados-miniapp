@@ -297,38 +297,56 @@ export class Campaign {
   }
 
   /**
-   * Get unique donor count by analyzing blockchain events
+   * Get unique donor count by analyzing campaign contract events
    */
   async getUniqueDonorCount(): Promise<number> {
     try {
-      console.log('🔍 Getting unique donor count for contract:', this.contract.address)
+      console.log('🔍 Getting unique donor count for campaign contract:', this.contract.address)
       
-      // Get all Transfer events from cBRL token to this campaign contract
-      const cBRLAddress = '0x0f628966ea621e7283e9AB3C7935A626b9607718'
-      const cBRLABI = [
-        'event Transfer(address indexed from, address indexed to, uint256 value)'
-      ]
+      // Get donation events from the campaign contract itself
+      const donationFilter = this.contract.filters.DonationReceived?.()
       
-      const cBRLContract = new ethers.Contract(cBRLAddress, cBRLABI, this.provider)
+      let events = []
       
-      // Filter for transfers TO this campaign contract
-      const filter = cBRLContract.filters.Transfer(null, this.contract.address)
-      
-      // Get events from contract deployment to now
-      const events = await cBRLContract.queryFilter(filter, 0, 'latest')
-      
-      console.log('📊 Found transfer events:', events.length)
+      if (donationFilter) {
+        // Try to get DonationReceived events
+        console.log('🔍 Searching for DonationReceived events...')
+        events = await this.contract.queryFilter(donationFilter, -10000) // Last 10k blocks
+        console.log('📊 Found DonationReceived events:', events.length)
+      } else {
+        // Fallback: try to get all events and filter manually
+        console.log('🔍 Searching for all contract events...')
+        try {
+          const allEvents = await this.contract.queryFilter('*', -5000) // Last 5k blocks
+          console.log('📊 Found all events:', allEvents.length)
+          
+          // Filter for donation-related events
+          events = allEvents.filter(event => 
+            event.event === 'DonationReceived' || 
+            event.event === 'Donation' ||
+            (event.args && event.args.donor)
+          )
+          console.log('📊 Filtered donation events:', events.length)
+        } catch (error) {
+          console.log('⚠️ Could not get events, using fallback method')
+          return 0
+        }
+      }
       
       // Extract unique donor addresses
       const uniqueDonors = new Set<string>()
       
       events.forEach(event => {
-        if (event.args && event.args.from) {
-          // Exclude zero address (minting) and contract addresses
-          const fromAddress = event.args.from.toLowerCase()
-          if (fromAddress !== '0x0000000000000000000000000000000000000000') {
-            uniqueDonors.add(fromAddress)
-            console.log('💰 Donor found:', fromAddress)
+        if (event.args) {
+          // Try different possible field names for donor address
+          const donorAddress = event.args.donor || event.args.from || event.args[0]
+          
+          if (donorAddress && typeof donorAddress === 'string') {
+            const address = donorAddress.toLowerCase()
+            if (address !== '0x0000000000000000000000000000000000000000') {
+              uniqueDonors.add(address)
+              console.log('💰 Donor found:', address)
+            }
           }
         }
       })
@@ -341,6 +359,7 @@ export class Campaign {
       
     } catch (error: any) {
       console.error('❌ Error getting unique donor count:', error)
+      console.error('❌ Error details:', error.message)
       return 0
     }
   }
