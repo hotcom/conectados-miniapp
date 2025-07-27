@@ -125,15 +125,15 @@ export function Sidebar() {
                   </div>
                 </div>
               </div>
-              <div className="space-y-4">
+              <div className="flex flex-col">
                 <Link href="/profile">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full mb-4">
                     <User className="w-4 h-4 mr-2" />
                     Ver Meu Perfil
                   </Button>
                 </Link>
                 <Link href="/create">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 mb-4">
                     <Plus className="w-4 h-4 mr-2" />
                     Criar Campanha
                   </Button>

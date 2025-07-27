@@ -31,13 +31,23 @@ export function FeedRedesigned() {
   const loadFeedData = async () => {
     try {
       setLoading(true)
+      console.log('🔄 Loading feed data...')
       
-      // Load campaigns and posts separately
+      // Load campaigns, posts, and organizations in parallel
       const [campaigns, posts, organizations] = await Promise.all([
         firebaseStorage.getCampaigns(),
         firebaseStorage.getPosts(),
         firebaseStorage.getOrganizations()
       ])
+      
+      console.log('📊 Data loaded:', {
+        campaigns: campaigns.length,
+        posts: posts.length,
+        organizations: organizations.length
+      })
+      console.log('📋 Campaigns:', campaigns)
+      console.log('📝 Posts:', posts)
+      console.log('🏢 Organizations:', organizations)
 
       // Create feed items array
       const items: FeedItem[] = []
